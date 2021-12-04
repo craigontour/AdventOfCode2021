@@ -4,14 +4,14 @@ def getInput(t)
 end
 
 if (ARGV[0] != nil)
-  getInput('test.txt')
+  data = getInput('test')
 else
-  getInput('input.txt')
+  data = getInput('input')
 end
 
 dist = depth = 0
 
-.each do |line|
+data.each do |line|
   dir, amount = line.chomp.split(' ')
   # puts "dir: #{dir}; amount: #{amount}"
   case dir
