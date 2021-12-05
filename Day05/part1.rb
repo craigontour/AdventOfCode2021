@@ -6,8 +6,7 @@ def pause
   exit if STDIN.gets.chomp == 'x'
 end
 
-# Globals
-points = []
+coords = Array.new(999) { Array.new(999, 0) }
 dangerous = []
 
 # Check points are increasing direction
@@ -27,16 +26,14 @@ def not_diagonal(pt1, pt2)
   return pt1[0] == pt2[0] || pt1[1] == pt2[1]
 end
 
-def create_points(pt1, pt2, points, dangerous)
-  # puts "create points: #{pt1} -> #{pt2}"
+def create_coord(pt1, pt2, coords, dangerous)
+  # puts "create coord: #{pt1} -> #{pt2}"
 
   (pt1[0]..pt2[0]).each do |x|
     (pt1[1]..pt2[1]).each do |y|
-      # puts "create point: #{x}, #{y}, ? #{points.include?([x, y])}"
-      if points.include?([x, y]) && !dangerous.include?([x, y])
-        dangerous << [x, y]
-      end
-      points << [x, y]
+      # puts "create coord: #{x}, #{y}, ? #{points.include?([x, y])}"
+      coords[x, y] += 1
+      dangerous << [x, y] if coords[x, y] > 1 && !dangerous.include?([x, y])
     end
   end
 end
@@ -50,12 +47,12 @@ data = File.readlines(filename).map(&:strip).each do |line|
   pt1, pt2 = sort_direction([sx, sy], [ex, ey])
 
   if not_diagonal(pt1, pt2)
-    create_points(pt1, pt2, points, dangerous)
+    create_coord(pt1, pt2, coords, dangerous)
   else
-    # puts "diagnonal line : #{pt1} -> #{pt2}"
+    puts "diagnonal line : #{pt1} -> #{pt2}"
   end
   # pause
 end
 
-# pp points.sort
 pp dangerous.length
+# Part1 = 4745
