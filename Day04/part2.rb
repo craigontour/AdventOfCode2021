@@ -67,7 +67,7 @@ winners = []
 
 balls.each do |ball|
   boxes.each_with_index do |box, i|
-    puts "box: #{i}"
+    # puts "box: #{i}"
     box, house = ball_found(box, ball)
     if house
       total = 0
