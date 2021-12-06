@@ -32,8 +32,9 @@ def create_coord(pt1, pt2, coords, dangerous)
   (pt1[0]..pt2[0]).each do |x|
     (pt1[1]..pt2[1]).each do |y|
       # puts "create coord: #{x}, #{y}, ? #{points.include?([x, y])}"
-      coords[x, y] += 1
-      dangerous << [x, y] if coords[x, y] > 1 && !dangerous.include?([x, y])
+      # puts "coords[#{x}, #{y}] = #{coords[y][x]}"
+      coords[y][x] += 1
+      dangerous << [x, y] if coords[y][x] > 1 && !dangerous.include?([x, y])
     end
   end
 end
@@ -49,7 +50,7 @@ data = File.readlines(filename).map(&:strip).each do |line|
   if not_diagonal(pt1, pt2)
     create_coord(pt1, pt2, coords, dangerous)
   else
-    puts "diagnonal line : #{pt1} -> #{pt2}"
+    # puts "diagnonal line : #{pt1} -> #{pt2}"
   end
   # pause
 end
