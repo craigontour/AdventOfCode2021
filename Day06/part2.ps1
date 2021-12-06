@@ -1,3 +1,5 @@
+# By Mark Neves
+
 $ErrorActionPreference="Stop"
 $data=@()
 
@@ -26,6 +28,7 @@ for ($d=1;$d -le $numDays;$d++)
         $days[$i] += $days[$d]
     }
 }
+
 $total=($days.Values |  measure -sum).Sum + $numFish
 $total
 
