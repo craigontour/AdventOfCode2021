@@ -1,5 +1,7 @@
 # recursion
 
+start = ticks
+
 def pause
   puts "pause..."
   exit if STDIN.gets.chomp == 'x'
@@ -29,19 +31,6 @@ fish.each_with_index do |f, i|
   end
 end
 
-# (1..DAYS).each do |d|
-#   ((d + 9)..(DAYS)).step(7).each do |i|
-#     if days[i].nil?
-#       puts "day: #{d}, i: #{i}"
-#       days[i] = 1
-#     else
-#       puts "day: #{d}, i: #{i}, days[#{i}]: #{days[i]}"
-#       days[i] += 1
-#     end
-#     pause
-#   end
-# end
-
 (1..ENDDAYS).each do |d|
   next if days[d].nil?
   
@@ -60,4 +49,4 @@ end
 
 # days.each { |h, v| puts "#{h} -> #{v}" }
 
-puts "Part 2: #{days.sum {|h,v| v} + fish.length}"
+puts "Part 2: #{days.sum {|h,v| v} + fish.length} in #{Time.now()-start) sec."
