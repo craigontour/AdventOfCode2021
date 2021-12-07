@@ -1,6 +1,6 @@
 # recursion
 
-start = ticks
+start = Time.now()
 
 def pause
   puts "pause..."
@@ -49,4 +49,4 @@ end
 
 # days.each { |h, v| puts "#{h} -> #{v}" }
 
-puts "Part 2: #{days.sum {|h,v| v} + fish.length} in #{Time.now()-start) sec."
+puts "Part 2: #{days.sum {|h,v| v} + fish.length} in #{Time.now()-start} sec."

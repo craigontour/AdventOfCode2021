@@ -1,5 +1,7 @@
 # By Mark Neves
 
+$start = Get-Date
+
 $ErrorActionPreference="Stop"
 $data=@()
 
@@ -31,5 +33,7 @@ for ($d=1;$d -le $numDays;$d++)
 
 $total=($days.Values |  measure -sum).Sum + $numFish
 $total
+
+($(Get-Date)-$start).seconds
 
 $days | % { $_ }
