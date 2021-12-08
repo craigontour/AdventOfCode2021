@@ -38,14 +38,6 @@ File.readlines("#{f}.txt").each do |line|
   output.split(' ').each do |digit|
     # puts "digit: #{digit}, length: #{digit.length}"
     count += 1 if digit.length != 5 && digit.length != 6
-  #   dig = digit.chars.sort.join('')
-
-  #   if digits[dig].nil?
-  #     puts "dont know what #{digit} is"
-  #   else
-  #     puts "#{digit} is #{digits[dig]}"
-  #   end
-    # pause
   end
 end
 

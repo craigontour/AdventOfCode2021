@@ -1,0 +1,54 @@
+
+digits = {
+  # digit -> segments -> binary -> decimal
+  '0' => {
+    segment: 'abcefg',
+    binary: '111011',
+    decimal: 59
+  },
+  '1' => {
+    segment: 'cf',
+    binary: '0010010',
+    decimal: 18
+  },
+  '2' => {
+    segment: 'acdeg',
+    binary: '1011101',
+    decimal: 93
+  },
+  '3' => {
+    segment: 'acdfg',
+    binary: '1011011',
+    decimal: 91
+  },
+  '4' => {
+    segment: 'bcdf',
+    binary: '0111010',
+    decimal: 58
+  },
+  '5' => {
+    segment: 'abdfg',
+    binary: '1101011',
+    decimal: 107
+  },
+  '6' => {
+    segment: 'abdefg',
+    binary: '1101111',
+    decimal: 111
+  },
+  '7' => {
+    segment: 'acf',
+    binary: '1010010',
+    decimal: 82
+  },
+  '8' => {
+    segment: 'abcdefg',
+    binary: '1111111',
+    decimal: 127
+  },
+  '9' => {
+    segment: 'abcdfg',
+    binary: '1111011',
+    decimal: 123
+  }
+}
