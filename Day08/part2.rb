@@ -44,22 +44,16 @@ input = File.readlines("#{f}.txt").map(&:strip)
     output = ''
 
     l.split(' ').each do |segment|
-      digit = findDigit(segment, config)
-      if digit.nil?
-        nextPerm = true
+      if !findDigit(segment, config).nil?
+        r.split(' ').each do |segment|
+          output += findDigit(segment, config)
+        end
       else
-        digits += digit.to_i
+        nextPerm = true
       end
-      # pause
     end
-
-    if digits == 45
-      r.split(' ').each do |segment|
-        output += findDigit(segment, config)
-      end
-    else
-      puts "next permuation"
-    end
+    
+    next if nextPerm
     
     puts "r: #{r} = #{output}",  ' '
   end
