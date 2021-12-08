@@ -1,3 +1,5 @@
+start = Time.now()
+
 f = ARGV[0] == 't' ? 'test' : 'input'
 
 def pause
@@ -10,11 +12,9 @@ end
 }
 
 def findDigit(segment, config)
-  puts "segment: #{segment}, config: #{config}"
-
   str = ''
   segment.chars.sort.each do |ch|
-    el = config.chars.find_index(ch)
+    el = config.find_index(ch)
     if 'abcdefg'[el].nil?
       return nil
     else
@@ -23,7 +23,7 @@ def findDigit(segment, config)
     # puts "ch: #{ch}, el: #{el}, str: #{str}"
   end
   
-  puts "segment: #{segment}, digit: #{@master[str.chars.sort.join('')]}"
+  # puts "segment: #{segment}, config: #{config.join('')}, str: #{str}, digit: #{@master[str.chars.sort.join('')]}"
   
   return @master[str.chars.sort.join('')]
 end
@@ -31,30 +31,32 @@ end
 input = File.readlines("#{f}.txt").map(&:strip)
 # input = ['acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf']
 
-'abcdefg'.chars.permutation do |config|
-# config = 'deafgbc'
-  outputs = []
-  nextPerm = false
+total = 0
 
-  input.each do |line|
-    l, r = line.chomp.split(' | ')
-    # puts "l: #{l} r: #{r}"
-
-    digits = 0
-    output = ''
+input.each do |line|
+  l, r = line.chomp.split(' | ')
+  
+  'abcdefg'.chars.permutation do |config|
+    # config = 'deafgbc'.chars
+    nextPerm = false
 
     l.split(' ').each do |segment|
-      if !findDigit(segment, config).nil?
-        r.split(' ').each do |segment|
-          output += findDigit(segment, config)
-        end
-      else
+      if findDigit(segment, config).nil?
         nextPerm = true
+        break
       end
     end
-    
+  
     next if nextPerm
-    
-    puts "r: #{r} = #{output}",  ' '
+
+    digits = []
+    r.split(' ').each do |segment|
+      digits << findDigit(segment, config).to_i
+    end
+    total += digits.join('').to_i
+
+    # outputs += digits.join('').to_i if !digits.nil?
   end
 end
+
+puts "part 2: #{total} in #{Time.now() - start} secs."
