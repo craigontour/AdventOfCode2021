@@ -1,3 +1,5 @@
+$start = Get-Date
+
 Function Get-StringPermutation {
   <#
       .SYNOPSIS
@@ -86,7 +88,7 @@ Function Get-StringPermutation {
   End {}
 }
 
-$data = Get-Content "input.txt" | ForEach-Object { $_.split('\n') }
+$data = Get-Content "test.txt" | ForEach-Object { $_.split('\n') }
 
 $part1 = 0
 foreach ($line in $data) {
@@ -108,8 +110,18 @@ $template = @{
 }
 
 function findDigit {
-  return '1'
+  param([string]$segment, [string]$config)
+  Write-host "Segment: $segment"
+  $str = ""
+  for ($i=0; $i -lt $segment.length; $i++) {
+    Write-Host "char: $($segment[$i])"
+  }
+
 }
+
+findDigit("afc" | sort)
+
+exit
 
 $part2 = 0
 foreach ($line in $data) {
@@ -130,7 +142,7 @@ foreach ($line in $data) {
 
     if ($nextPerm) { continue }
 
-    $digits = @()
+    $digits = ''
 
     $segments = $lr[1].split(' ')
     foreach ($segment in $segments) {
@@ -140,4 +152,8 @@ foreach ($line in $data) {
   }
 
 }
-Write-host "Part 2: $part2"
+
+$elapsed = $(Get-Date) - $start
+$totalTime = "{0:HH:mm:ss}" -f ([datetime]$elapsed.Ticks)
+
+Write-host "Part 2: $part2 in $totalTime"

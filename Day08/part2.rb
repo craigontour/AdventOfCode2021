@@ -15,14 +15,8 @@ def findDigit(segment, config)
   str = ''
   segment.chars.sort.each do |ch|
     el = config.find_index(ch)
-    if 'abcdefg'[el].nil?
-      return nil
-    else
-      str += 'abcdefg'[el]
-    end
-    # puts "ch: #{ch}, el: #{el}, str: #{str}"
+    str += 'abcdefg'[el]
   end
-  
   # puts "segment: #{segment}, config: #{config.join('')}, str: #{str}, digit: #{@master[str.chars.sort.join('')]}"
   
   return @master[str.chars.sort.join('')]
@@ -59,4 +53,4 @@ input.each do |line|
   end
 end
 
-puts "part 2: #{total} in #{Time.now() - start} secs."
+puts "part 2: #{total} in #{Time.now() - start} sec"
