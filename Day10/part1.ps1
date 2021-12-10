@@ -8,7 +8,7 @@ foreach ($line in $lines)
 
   while ($line -match "()" || $line -match "[]" || $line -match "{}" || $line -match "<>")
   {
-    "subbing:`r`n$($line.replace("()",'@@').replace('[]','@@').replace('{}','@@').replace("<>",'@@'))"
+    "subbing:`r`n$line"
 
     $line = $line.replace("()",'').replace("[]",'').replace("{}",'').replace("<>",'')
     "subbed:`r`n$line"
