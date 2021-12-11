@@ -32,8 +32,7 @@ def getNeighbours(x, y, grid)
     # puts "x: #{y}, y: #{y} => dir: #{dir}: #{grid[y + dir[1]][x + dir[0]]}"
     if (y + dir[1] >= 0) && (x + dir[0] >= 0) && (y + dir[1] < H) && (x + dir[0] < W)
       # puts "#{x}, #{y} neighbour is: #{y + dir[1]},#{x + dir[0]}, val: #{grid[y + dir[1]][x + dir[0]]}"
-      neighbours << [y + dir[1] , x + dir[0]]
-      # pause
+      neighbours << [x + dir[0], y + dir[1]]
     end
   end
   return neighbours
@@ -43,11 +42,8 @@ def flash(x, y, octos, flashed)
   puts "flash at #{x}, #{y}"
   neighbours = getNeighbours(x, y, octos)
   neighbours.each do |neighbour|
-    octos[neighbour[1]][neighbour[0]] += 1
-    
-    if octos[neighbour[1]][neighbour[0]] > 9 && !flashed.include?([neighbour[1], neighbour[0]])
-      flashed << [y, x]
-      flash(neighbour[0], neighbour[1], octos, flashed)
+    if !flashed.include?([neighbour[0]],[neighbour[1]])
+      octos[neighbour[0]][neighbour[1]] += 1
     end
   end
 end
@@ -64,16 +60,18 @@ for step in 0..10 do
 
   octos = addOne(octos)
   pp octos, '----'
-  puts "Any flashing? = #{octos.flatten.include?(9)}"
-  pause
 
-  (0...H).each do |y|
-    (0...W).each do |x|
-      if octos[y][x] > 9
+  (0...H).each do |x|
+    (0...W).each do |y|
+      if octos[x][y] > 9
         flash(x, y, octos, flashed)
-        pause
+        flashed << [x, y]
       end
     end
+  end
+
+  flashed.each do |octo|
+    octos[octo[0]][octo[1]] = 0
   end
 
   puts "After step #{step+1}:\n"
