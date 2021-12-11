@@ -4,17 +4,10 @@ $lines = get-content 'test.txt'
 $i = 0
 foreach ($line in $lines)
 {
-  "$i before: $line"
-
-  while ($line -match "()" || $line -match "[]" || $line -match "{}" || $line -match "<>")
+  while (($line | select-string "()" -SimpleMatch) || ($line | select-string "[]" -SimpleMatch) || ($line | select-string "{}" -SimpleMatch)|| ($line | select-string "<>" -SimpleMatch))
   {
-    "subbing:`r`n$line"
-
     $line = $line.replace("()",'').replace("[]",'').replace("{}",'').replace("<>",'')
     "subbed:`r`n$line"
-    pause
   }
-  
-  "$i after : $line`r`n"
-  $i += 1
+
 }
