@@ -74,18 +74,23 @@ def printDots(dots)
   arr = dots.to_a #.sort
   maxx = arr.max_by { |x, y| x }[0]
   maxy = arr.max_by { |x, y| y }[0]
-  grid = Array.new(maxy) { Array.new(maxx, ' ') }
+  puts "maxx: #{maxx}"
+  puts "maxy: #{maxy}"
+
+  grid = Array.new(maxy+1) { Array.new(maxx+1, '.') }
+  # print grid,''
 
   dots.each do |x, y|
+    # puts "x:#{x},y:#{y} is dot"
     grid[y][x] = '#'
   end
 
-  for j in 0...maxy
+  for j in 0..maxy
     s = ''
-    for i in 0...maxx
+    for i in 0..maxx
       s += grid[j][i]
     end
-  puts s
+    puts s
   end
 end
 
@@ -93,7 +98,7 @@ dots, folds = getInput(ARGV[0])
 
 folds.split("\n").each_with_index do |fold , i|
   axis, num = fold.chomp.split(' ')[-1].split('=')
-  puts "axis:#{axis}, num:#{num}"
+  # puts "axis:#{axis}, num:#{num}"
 
   if axis == 'y'
     dots = fold_horizontal(dots, num.to_i)
@@ -101,9 +106,9 @@ folds.split("\n").each_with_index do |fold , i|
     dots = fold_vertical(dots, num.to_i)
   end
 
-  pause
+  # pause
 end
 
-pp dots
-pause
+# pp dots
+# pause
 printDots(dots)
