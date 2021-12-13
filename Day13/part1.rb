@@ -1,78 +1,94 @@
+require 'set'
+
 start = Time.now()
+@w = @h = 0
+
+def getInput(f)
+  input, folds = File.read("#{f}.txt").split("\n\n")
+  input = input.split("\n")
+
+  dots = Set.new
+
+  input.each do |row|
+    x, y = row.chomp.split(',').map(&:to_i)
+    @w = x if x > @w
+    @h = y if y > @h
+    dots << [x, y]
+  end
+
+  # pp dots, ''
+
+  return dots, folds
+end
 
 def pause(m = "pause")
   puts "#{m}..."
   exit if STDIN.gets.chomp == 'x'
 end
 
-def getInput(f)
-  input, folds = File.read("#{f}.txt").split("\n\n")
-  input = input.split("\n")
-  return input, folds
+def inBounds(coord, bounds)
+  x = coord[0]
+  y = coord[1]
+  tl = bounds[0]
+  br = bounds[1]
+  return x >= tl[0] && y >= tl[1] && x <= br[0] && y <= br[1]
 end
 
-def getMax(input)
-  maxx = maxy = 0
-  input.each do |row|
-    x, y = row.chomp.split(',').map(&:to_i)
-    # puts "row:#{row}, x:#{x}, y:#{y}, maxx:#{maxx}, maxy:#{maxy}"
-    maxx = x if x > maxx
-    maxy = y if y > maxy
-  end
-  return maxx, maxy
-end
+def fold_horizontal(dots, row)
+  bounds = [ [0, 0], [@w, row-1]]
+  # puts "horizontal fold at #{row}"
+  # puts "bounds are #{bounds[0][0]},#{bounds[0][1]}-#{bounds[1][0]},#{bounds[1][1]}"
 
-def getDots(input)
-  x, y = getMax(input)
-  dots = Array.new(y+1) { Array.new(x+1, '.') }
-  input.each do |row|
-    x, y = row.chomp.split(',').map(&:to_i)
-    # puts "x:#{x}, y:#{y}, dots:#{dots[y][x]}"
-    dots[y][x] = '#'
-  end
-  return dots
-end
+  newMap = Set.new
 
-def fold_horizontal(dots, n)
-  folded = dots[0..n]
-  
-  # Copy dots up to row r
-  (dots.length-1).downto(n+1) do |y|
-    puts "row: #{y}"
-    puts "from 0 to #{dots[0].length-1}"
-    # 0..(dots[0].length-1) do |x|
-    # #   puts "x:#{x}"
-    # # #   if dots[y][x] == '#'
-    # # #     folded[(dots.length-1)-y][x] = '#'
-    # # #   end
-    # # #   pause
-    # end
-  end
-end
-
-# def fold_vetical(dots, n)
-#   puts "Fold on x"
-# end
-
-def do_fold(dots, folds, stop)
-  folds.split("\n").each_with_index do |fold , i|
-    axis, num = fold.chomp.split(' ')[-1].split('=')
-    puts "fold along #{axis} number #{num}"
-
-    if axis == 'y'
-      fold_horizontal(dots, num.to_i)
+  dots.each do |coord|
+    # puts "inBounds: #{coord} within: #{bounds[0]}-#{bounds[1]} = #{inBounds(coord, bounds)}"
+    if inBounds(coord, bounds)
+      newMap << coord
     else
-      fold_vetical(dots, num.to_i)
+      newCoord = [coord[0], row - (coord[1] - row)]
+      # puts "coord #{coord} has new coord at #{newCoord}"
+      newMap << newCoord
     end
-
-    return dots if i+1 == stop
+    # pause
   end
+
+  return newMap
 end
 
-input, folds = getInput(ARGV[0])
-dots = getDots(input)
-# pp dots
+def fold_vertical(dots, col)
+  bounds = [ [0, 0], [col - 1, @h]]
+  # puts "vertical fold at #{col}"
+  # puts "bounds are #{bounds[0][0]},#{bounds[0][1]}-#{bounds[1][0]},#{bounds[1][1]}"
 
-pp do_fold(dots, folds, 1).flatten.count('#')
+  newMap = Set.new
 
-# pp "Part1: #{part1(getInput(ARGV[0])), folds} in #{Time.now - start} secs"
+  dots.each do |coord|
+    # puts "inBounds: #{coord} within: #{bounds[0]}-#{bounds[1]} = #{inBounds(coord, bounds)}"
+    if inBounds(coord, bounds)
+      newMap << coord
+    else
+      newCoord = [col - (coord[0] - col), coord[1]]
+      # puts "coord #{coord} has new coord at #{newCoord}"
+      newMap << newCoord
+    end
+    # pause
+  end
+
+  return newMap
+end
+
+dots, folds = getInput(ARGV[0])
+
+folds.split("\n").each_with_index do |fold , i|
+  axis, num = fold.chomp.split(' ')[-1].split('=')
+  # puts "fold along #{axis} number #{num}"
+
+  if axis == 'y'
+    puts fold_horizontal(dots, num.to_i).length
+  else
+    puts fold_vertical(dots, num.to_i).length
+  end
+
+  exit if i == 0
+end
