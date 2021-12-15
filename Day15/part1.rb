@@ -1,5 +1,7 @@
 start = Time.now()
-
+ 
+DIRECTIONS = [ [0, -1], [1, 0], [0, 1], [-1, 0] ]
+ 
 def pause(m = "pause")
   puts "#{m}..."
   exit if STDIN.gets.chomp == 'x'
@@ -10,31 +12,8 @@ def getInput(f)
   File.readlines("#{f}.txt").map(&:strip).each do |line|
     input.push(line.chars.map(&:to_i))
   end
-  return input
-end
-chitons = getInput(ARGV[0])
-
-chitons = [ [1,2,3], [4,5,6], [7,8,9] ]
-pp chitons
-
-DIRECTIONS = [ [0, -1], [1, 0], [0, 1], [-1, 0] ]
-
-class Route
-  attr_accessor :path, :risk
-
-  def initialize(path, risk)
-    @path = path
-    @risk = risk
-  end
-  
-  def add(grid, point)
-    @path += [ point ]
-    @risk += grid[point[0]][point[1]]
-  end
-
-  def to_s
-    puts "#{@path} risk: #{@risk}"
-  end
+  # return input
+  return [ [1,2,3], [4,5,6], [7,8,9] ]
 end
 
 def get_neighbours(grid, point)
@@ -68,9 +47,8 @@ def get_path(grid, start, last, path, paths)
   end
 end
 
-paths = []
 last = [chitons.length-1, chitons.length-1]
-
+paths = []
 get_path(chitons, [0,0], last, [], paths)
 
 pp paths
