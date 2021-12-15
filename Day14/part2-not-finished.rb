@@ -28,24 +28,35 @@ def update(template)
     else
       poly += replaced[1..2]
     end
-    # puts "#{pair}->#{replaced}"
-    # pause
   end
   return poly
 end
 
-def part1(template, n)
-  n.times do
+def part2(template, n)
+  puts template
+  n.times do |t|
     newtemplate = update(template)
-    # puts newtemplate.length
     template = newtemplate
-    # pause
+    puts "#{t+1}: #{template} | #{template.length} | #{template.chars.sort.chunk { |c| c }.map { |c, ch| [ch.size, c] }}"
+
+    # counts = template.chars.sort.map { |c| [template.count(c), c] } #.sort.uniq!
+    # total = counts.map { |k,v| k.sum }
+    # counts.map { |k,v| "#{v}: #{k/total}"}
+    # pp counts
   end
   counts = template.chars.sort.map { |c| [template.count(c), c] }.sort.uniq!
   return (counts[-1][0] - counts[0][0])
 end
 
+# def part2(template, n)
+#   l = template.length
+#   (1..n).each do |i|
+#     l = l + (l-1)
+#     puts "i:#{i} #{l}"
+#   end
+#   return l
+# end
+
 template, pairs = getInput(ARGV[0])
 
-pp "Part1: #{part1(template, 10)} in #{Time.now - start} secs"
-pp "Part2: #{part1(template, 40)} in #{Time.now - start} secs"
+pp "Part2: #{part2(template, 10)} in #{Time.now - start} secs"
