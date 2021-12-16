@@ -15,7 +15,6 @@ rules = input[2..].map{ _1.split(' -> ').map(&:chars).flatten }
 # pp "Pairs:"
 # pp pairs,''
 
-
 ARGV[1].to_i.times do
   new_pairs = pairs.clone
   # puts "new_pairs: #{new_pairs}"
