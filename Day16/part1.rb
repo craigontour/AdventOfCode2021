@@ -1,5 +1,5 @@
 start = Time.now()
- 
+
 def pause(m = "pause")
   puts "#{m}..."
   exit if STDIN.gets.chomp == 'x'
@@ -13,55 +13,101 @@ def getInput(testing)
   end
 end
 
-input = getInput(ARGV[0])
-
-def getLiteral(packet)
+def processLiteral(packet)
+  version = packet[0..2].to_i(2)
+  @versions << version
+  
+  subpacket = packet[6..]
+  
+  done = false
   literal = ''
-  vvv = packet[0..2].to_i(2)
-  ttt = packet[3..5].to_i(2)
-  (6..(packet.length-1)).step(5) do |i|
-    bits = packet[i..i+4]
-    if bits.length == 5
-      literal += bits[1..]
-    end
+  while !done do
+    done = true if subpacket[0] == '0'
+    literal += subpacket[1..4]
+    subpacket = subpacket[5..]
   end
+
+  puts "processLiteral: packet:#{literal}, int:#{literal.to_i(2)}"
   return literal.to_i(2)
 end
 
 def getOperator(packet)
-  vvv = packet[0..2].to_i(2)
-  ttt = packet[3..5].to_i(2)
-  puts "operator: vvv:#{vvv}, ttt:#{ttt}, I:#{packet[6]}"
+  version = packet[0..2].to_i(2)
+  @versions << version
+  puts "Operator: version:#{version}, length type id: #{packet[6]}"
 
-  if packet[6].to_i == 0
-    lll = packet[7..21].to_i(2)
-    puts "label: #{lll}, length: #{lll}"
+  if packet[6] == '0'
+    # length of the sub-packets in bits
+    subLength = packet[7..21].to_i(2)
+    puts "packet[7..21]: #{packet[7..21]}, subLength: #{subLength}"
 
-    aaa = packet[22..32]
-    puts "sub-packet 1: #{aaa}, literal: #{getLiteral(aaa)}"
+    # repeat ( subLength / 27 ) times
+    iterations = subLength / 27
+    puts "packet[22..]: #{packet[22..]}, iterations: #{iterations}"
+    
+    s = 22
+    (0..(subLength / 27) -1).each do |t|
+      si = s + (t*27)
+      se = si + 10
+      pl = processLiteral(packet[si..se])
+      puts "packet[#{si}..#{se}]: #{packet[si..se]}, pl: #{pl}"
 
-    bbb = packet[33..49]
-    puts "sub-packet 2: #{bbb}, literal: #{getLiteral(bbb)}"
-  else      
-    lll = packet[7..17].to_i(2)
-    puts "lll: #{packet[7..17]}, literal: #{lll}"
+      si = se + 1
+      se = si + 15
+      pl = processLiteral(packet[si..se])
+      puts "packet[#{si}..#{se}]: #{packet[si..se]}, pl: #{pl}"
+    end
+  elsif packet[6] == '1'
+    subPackets = packet[7..17].to_i(2)
+    puts "packet[7..17]: #{packet[7..17]}, subPackets: #{subPackets}"
 
     s = 18
-    (0...lll).each do |t|
+    (0...subPackets).each do |t|
       si = s + (t*11)
       ei = si + 11
-      sub = packet[si..ei]
-      puts "sub[#{si}..#{ei}]: #{t} = #{sub}, literal: #{getLiteral(sub)}"
+      processLiteral(packet[si..ei])
     end
+  
+  else
+    puts "Operator length type id ERROR."
+    exit
   end
+
+  puts "packet: #{packet}"
 end
 
-input.each do |line|
-  packet = line.chomp.hex.to_s(2).rjust(line.length*4, '0')
-  ttt = packet[3..5].to_i(2)
-  if ttt == 4
-    data = getLiteral(packet)
+def processPacket(packet)
+  typeid = packet[3..5].to_i(2)
+
+  if typeid == 4
+    # A packet with a type ID of 4 is a literal
+    puts "Literal, typeid: #{typeid}"
+    processLiteral(packet)
   else
-    data = getOperator(packet)
+    # Any packet with a type ID other than 4 is an operator
+    puts "Operator, typeid: #{typeid}"
+    getOperator(packet)
   end
+  puts "processed packet: #{packet}, versions: #{@versions}"
+  pause
 end
+
+@versions = []
+
+# processPacket('110100101111111000101000')
+# processPacket('11101110000000001101010000001100100000100011000001100000')
+
+getInput(ARGV[0]).each do |line|
+  @versions = []
+
+  packet = line.chomp.hex.to_s(2).rjust(line.length*4, '0')
+  puts "line: #{line}, packet: #{packet}", ''
+  processPacket(packet)
+  
+  puts "Final versions: #{@versions}", ''
+  pause
+end
+
+exit
+
+puts "Part 1: #{@versions}"
