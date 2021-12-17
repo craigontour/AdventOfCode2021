@@ -1,5 +1,5 @@
 start = Time.now()
-@stack = []
+@stacked = []
 
 def pause(m = "pause")
   puts "#{m}..."
@@ -24,7 +24,7 @@ def processLiteral(packet)
     subpacket = subpacket[5..]
   end
   puts "STACKED: #{literal.to_i(2)}"
-  @stack << literal.to_i(2)
+  @stacked << literal.to_i(2)
 
   return subpacket
 end
@@ -39,7 +39,7 @@ def processPacket(packet)
     packet = processLiteral(packet)
   elsif typeid >= 0 && typeid < 8
     puts "STACKED: #{OPERATORS[typeid]}"
-    @stack << OPERATORS[typeid]
+    @stacked << OPERATORS[typeid]
      
     if op_code == 0
       packet = processPacket(packet[22..])
@@ -62,51 +62,60 @@ end
 
 part2(getInput(ARGV[0]))
 
-values = @stack
+def getOperatorValue(el, numbers)
+  # puts "numbers: #{numbers}"
 
-def reverse_polish(stack)
-  numbers = el = []
-
-  for i in (stack.length-1).downto(0) do
-    
-    el = stack[i]
-    puts "i: #{i}, el: #{el}"
-
-    if ['+','*','min','max','>','<','=='].include?(el)
-      case el
-      when '+'; pp numbers.inject(&:+); v = numbers.inject(&:+)
-      when '*'; pp numbers.inject(&:*); v = numbers.inject(&:*)
-      when 'min'; pp numbers.min; v = numbers.min
-      when 'max'; pp numbers.max; v = numbers.max
-      when '>'; if numbers[0] > numbers[1]
-                  pp 1; ; v = 1
-                else
-                  pp 0; v = 0
-                end
-      when '<'; if numbers[0] < numbers[1]
-                  pp 1; v = 1
-                else
-                  pp 0; v = 0
-                end
-      when '='; if numbers[0] == numbers[1]
-                  pp 1; v = 1
-                else 
-                  pp 0; v = 0
-                end
-      end
-
-      puts "operator: #{el} | v: #{v}"
-      numbers = []
-      stack = stack[0..(i-1)]
-      stack += [v]
-    else
-      numbers += [el]
-      stack = stack[0..(i-1)]
-    end
-    puts "numbers: #{numbers}"
-    puts "i: #{i}\nstack: #{stack}"
-    pause('-----------------------')
+  case el
+  when '+'; v = numbers.inject(&:+)
+  when '*'; v = numbers.inject(&:*)
+  when 'min'; v = numbers.min
+  when 'max'; v = numbers.max
+  when '>'; if numbers[0] > numbers[1]
+              v = 1
+            else
+              v = 0
+            end
+  when '<'; if numbers[0] < numbers[1]
+              v = 1
+            else
+              v = 0
+            end
+  when '='; if numbers[0] == numbers[1]
+              v = 1
+            else 
+              v = 0
+            end
   end
+  return v, []
 end
 
-reverse_polish(values)
+def reverse_polish(stacked)
+  while stacked.length > 0 do
+    stack = []
+    numbers = []
+
+    stacked.each do |el|
+      # puts "el: #{el}"
+
+      if ['+','*','min','max','>','<','='].include?(el)
+        numbers << stack.pop << stack.pop
+        v, numbers = getOperatorValue(el, numbers)
+        # puts "operator: #{el} | v: #{v}"
+        stack = stack.push(v)
+      else
+        stack << el
+      end
+      # puts "stack: #{stack}"
+      # pause('-----------------------')
+    end
+    stacked = stack
+    pp "stacked: #{stacked}, #{stack.length}"
+    pause
+  end
+  pp @stacked
+  pause
+  return stack[0]
+end
+
+
+pp reverse_polish(@stacked.reverse)
