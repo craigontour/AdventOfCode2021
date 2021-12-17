@@ -1,5 +1,8 @@
 start = Time.now()
 @values = []
+@total = 0
+@operation = 0
+@depth = 0
 
 def pause(m = "pause")
   puts "#{m}..."
@@ -27,19 +30,16 @@ def processLiteral(packet)
   return subpacket, literal.to_i(2)
 end
 
-OPERATORS = { 0=>'sum', 1=>'product', 2=>'min', 3=>'max', 5=>'greater', 6=>'less than', 7=>'equal'}
+OPERATORS = { 0=>'+', 1=>'*', 2=>'min', 3=>'max', 5=>'>', 6=>'<', 7=>'=='}
 
 def processPacket(packet)
+  @depth += 1
   typeid = packet[3..5].to_i(2)
   op_code = packet[6].to_i(2)
 
-  puts "processPacket\npacket: #{packet}\ntypeid: #{typeid}\nop_code:#{op_code}\n\n"
-
   if typeid == 4
     packet, value = processLiteral(packet)
-    puts "4: literal\npacket: #{packet}\nvalue: #{value}\n"
   elsif typeid >= 0 && typeid < 8
-    puts "typeid: #{typeid}, #{OPERATORS[typeid]}\n",''
     if op_code == 0
       packet, value = processPacket(packet[22..])
     else
@@ -49,19 +49,29 @@ def processPacket(packet)
     puts "ERROR: unsupported typeid:#{typeid}. Exiting!"
     exit
   end
+  
+  puts "\n-  -  -  -  -  -  -\ndepth: #{@depth}\ntypeid: #{typeid}\nvalue: #{value}\n-  -  -  -  -  -  -\n"
 
   return packet, value
 end
 
 def part2(packet)
   while packet.length >= 11 do
+    typeid = packet[3..5].to_i(2)
+
+    puts "\n********* part2 TOP *******\ndepth: #{@depth}\ntypeid: #{typeid}\n"
+
     packet, value = processPacket(packet)
     
     @values << value if !value.nil?
-    pp @values
+    # pp @values
+    puts "\n******** part2 BOT ********\ndepth: #{@depth}\ntypeid: #{typeid}\nvalue: #{value}\nvalues: #{@values}\n**********************\n"
 
     pause
   end
+  return @values
 end
 
-puts "Part2: #{part2(getInput(ARGV[0]))}"
+v = part2(getInput(ARGV[0]))
+
+pp v

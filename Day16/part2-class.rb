@@ -1,12 +1,25 @@
 start = Time.now()
 
+def pause(m = "pause")
+  puts "#{m}..."
+  exit if STDIN.gets.chomp == 'x'
+end
+
+def getInput(f)
+  line = File.read("#{f}.txt")
+  packet = line.chomp.hex.to_s(2).rjust(line.length*4, '0')
+  # puts "line: #{line}\npacket: #{packet}\n"
+  return packet
+end
+
 class Packet
-  attr_accessor :version, :typeid, :operator, :rest, :value
+  attr_accessor :version, :typeid, :operator, :rest, :value, :children, :parent
 
-  def initialize (packet)
+  def initialize (packet, parent = [])
     @bits = packet
+    @parent = parent
+    @children = []
 
-    @version = packet[0..2].to_i(2)
     @typeid = packet[3..5].to_i(2)
     if @typeid == 4
       @rest = packet[6..]
@@ -49,18 +62,6 @@ end
 # puts pk.value
 # exit
 
-def pause(m = "pause")
-  puts "#{m}..."
-  exit if STDIN.gets.chomp == 'x'
-end
-
-def getInput(f)
-  line = File.read("#{f}.txt")
-  packet = line.chomp.hex.to_s(2).rjust(line.length*4, '0')
-  # puts "line: #{line}\npacket: #{packet}\n"
-  return packet
-end
-
 def processOperator(packet)
   values  []
 
@@ -79,78 +80,48 @@ def processOperator(packet)
   return packet, values
 end
 
-# 0 sum of sub-packets
-def sum_of_packets(packet)
-  processPacket(packet[6..])
-end
-
-def processLiteral(packet)
-  puts "-- Literal: packet: #{packet}",''
-  
-  subpacket = packet[6..]
+def processLiteral(pkt)
+  puts "-- Literal: packet: #{pkt}",''
   
   done = false
   literal = ''
   while !done do
-    done = true if subpacket[0] == '0'
-    literal += subpacket[1..4]
-    subpacket = subpacket[5..]
+    done = true if pkt[0] == '0'
+    literal += pkt[1..4]
+    pkt = pkt[5..]
   end
-  
-  return subpacket, literal.to_i(2)
+  pkt.value = literal.to_i(2)
+
+  return pkt
 end
 
 def processPacket(pkt)
   typeid = packet[3..5].to_i(2)
   op_code = packet[6].to_i(2)
 
-  puts "processPacket\npacket: #{packet}\ntypeid: #{typeid}\nop_code:#{op_code}"
+  puts "processPacket\npacket: #{packet}\ntypeid: #{typeid}\nop_code:#{op_code}\n\n"
 
   pause
-
-  case typeid
-  when 0
-    puts "0 : sum of sub-packets"
+  if [0,1,2,3,5,6,7].include?(typeid)
     if op_code == 0
-      values += processPacket(packet[22..])
+      child_pk = Packet.new(packet[22..], pkt)
     else
-      values += processPacket(packet[18..])
+      child_pk = Packet.new(packet[18..], pkt)
     end
-  when 1
-    puts "product of sub-packets"
-  when 2
-    puts "min of sub-packets"
-  when 3
-    puts "max of sub-packets"
-  when 4
+  elsif typeid == 4
     puts "4 : literal value"
-    packet, value = processLiteral(packet)
+    lit_pkt = Packet.new(packet[6..], pkt)
     pause
-  when 5
-    puts "greater than: 1 if sub-packet[0] > sub-packet[1] else 0"
-  when 6
-    puts "less than: 1 if sub-packet[0] < sub-packet[1] else 0"
-  when 7
-    puts "equal to: 1 if sub-packet[0] == sub-packet[1] else 0"
-  else
-    puts "ERROR: unsupported typeid:#{typeid}. Exiting!"
-    exit
-  end
-  @totalvalues += value
-  puts @totalvalues
 
-  return values
-end
+  end
 
 packets = []
 
 def part2(packet)
-  while bits.length > 11 do
-    pkt = Packet.new(bits)
-    processPacket(pkt)
-    bits = pkt.rest
-    packets << pkt
-  end
+  pkt = Packet.new(packet)
+  processPacket(pkt)
+  bits = pkt.rest
+  packets << pkt
 end
 
 puts "Part2: #{part2(getInput(ARGV[0]))}"
