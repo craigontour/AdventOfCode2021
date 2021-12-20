@@ -59,15 +59,9 @@ def part2(packet)
   while packet.length >= 11 do
     typeid = packet[3..5].to_i(2)
 
-    puts "\n********* part2 TOP *******\ndepth: #{@depth}\ntypeid: #{typeid}\n"
-
     packet, value = processPacket(packet)
     
     @values << value if !value.nil?
-    # pp @values
-    puts "\n******** part2 BOT ********\ndepth: #{@depth}\ntypeid: #{typeid}\nvalue: #{value}\nvalues: #{@values}\n**********************\n"
-
-    pause
   end
   return @values
 end

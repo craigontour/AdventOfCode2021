@@ -38,7 +38,7 @@ def processPacket(packet)
   if typeid == 4
     packet = processLiteral(packet)
   elsif typeid >= 0 && typeid < 8
-    puts "STACKED: #{OPERATORS[typeid]}"
+    # puts "STACKED: #{OPERATORS[typeid]}"
     @stacked << OPERATORS[typeid]
      
     if op_code == 0
@@ -94,14 +94,18 @@ def reverse_polish(stacked)
     stack = []
     numbers = []
 
-    stacked.each do |el|
+    stacked.each_with_index do |el, i|
       # puts "el: #{el}"
 
-      if ['+','*','min','max','>','<','='].include?(el)
-        numbers << stack.pop << stack.pop
-        v, numbers = getOperatorValue(el, numbers)
-        # puts "operator: #{el} | v: #{v}"
-        stack = stack.push(v)
+      if ['+','*']
+      elsif ['min','max','>','<','='].include?(el)
+        if stacked[i+1].to_i >= 0 && stacked[i+2].to_i >= 0
+          numbers << stack.pop << stack.pop
+          v, numbers = getOperatorValue(el, numbers)
+          stack = stack.push(v)
+        else
+          stack = stack.push(el)
+        end
       else
         stack << el
       end
@@ -117,5 +121,6 @@ def reverse_polish(stacked)
   return stack[0]
 end
 
+puts @stacked
 
 pp reverse_polish(@stacked.reverse)

@@ -7,60 +7,49 @@ end
 
 def getInput(f)
   line = File.read("#{f}.txt")
-  packet = line.chomp.hex.to_s(2).rjust(line.length*4, '0')
-  # puts "line: #{line}\npacket: #{packet}\n"
-  return packet
+  return line.chomp.hex.to_s(2).rjust(line.length*4, '0')
 end
 
 class Packet
-  attr_accessor :version, :typeid, :operator, :rest, :value, :children, :parent
+  attr_accessor :bits, :parent, :children, :type_id, :op_code
 
-  def initialize (packet, parent = [])
+  def initialize (packet, parent, children)
     @bits = packet
     @parent = parent
-    @children = []
+    @children = children
 
-    @typeid = packet[3..5].to_i(2)
-    if @typeid == 4
-      @rest = packet[6..]
-    else
-      @operator = packet[6].to_i(2)
-      if @operator == 0
-        @rest = packet[22..]
-      elsif @operator == 1
-        @rest = packet[18..]
-      else
-        raise("ERROR: #{@operator} is unsupported.")
-      end
-    end
-    @value = 0
+    @type_id = @bits[3..5].to_i(2)
+    @op_code = @bits[6].to_i(2)
   end
 
   def length
     @bits.length
   end
 
-  def restlen
-    @rest.length
-  end
-
   def to_s
     puts "
     Parent:
       bits      : #{@bits}
-      typeid    : #{@typeid}
-      operator  : #{@operator}
-      rest      : #{@rest}
+      parent    : #{@parent}
+      children  : #{@children}
     "
   end
 end
 
-# pk = Packet.new('1100001000000000101101000000101010000010')
-# puts pk.to_s
-# puts pk.length
-# puts pk.restlen
-# puts pk.value
-# exit
+def processLiteral(pkt)
+  subpacket = pkt.bits[6..]
+
+  literal = ''
+  done = false
+
+  while !done do
+    done = true if subpacket[0] == '0'
+    literal += subpacket[1..4]
+    subpacket = subpacket[5..]
+  end
+  pkt.addchild(literal.to_i(2))
+  pkt.rest = subpacket
+end
 
 def processOperator(packet)
   values  []
@@ -80,48 +69,35 @@ def processOperator(packet)
   return packet, values
 end
 
-def processLiteral(pkt)
-  puts "-- Literal: packet: #{pkt}",''
-  
-  done = false
-  literal = ''
-  while !done do
-    done = true if pkt[0] == '0'
-    literal += pkt[1..4]
-    pkt = pkt[5..]
-  end
-  pkt.value = literal.to_i(2)
+def processPacket(pkt)
+  pkt.to_s
 
+  if pkt.type_id == 4
+    processLiteral(pkt)
+  elsif pkt.type_id >= 0 && typeid < 8
+    if op_code == 0
+      pp = pkt.bits[7..21].to_i(2)
+      subs = getSubPacket(getSubPacket(packet[22..(22+pp)]))
+      # processPacket(packet[(22+pp)..])
+    else
+      pp = pkt.bits[7..17].to_i(2)
+      processPacket(packet[18..])
+    end
+  else
+    puts "ERROR: unsupported typeid:#{typeid}. Exiting!"
+    exit
+  end
+  
   return pkt
 end
 
-def processPacket(pkt)
-  typeid = packet[3..5].to_i(2)
-  op_code = packet[6].to_i(2)
-
-  puts "processPacket\npacket: #{packet}\ntypeid: #{typeid}\nop_code:#{op_code}\n\n"
-
-  pause
-  if [0,1,2,3,5,6,7].include?(typeid)
-    if op_code == 0
-      child_pk = Packet.new(packet[22..], pkt)
-    else
-      child_pk = Packet.new(packet[18..], pkt)
-    end
-  elsif typeid == 4
-    puts "4 : literal value"
-    lit_pkt = Packet.new(packet[6..], pkt)
-    pause
-
+def part2(pkt)
+  packets = []
+  while pkt.length >= 11 do
+    pkt = processPacket(pkt)
+    packets += []
   end
-
-packets = []
-
-def part2(packet)
-  pkt = Packet.new(packet)
-  processPacket(pkt)
-  bits = pkt.rest
-  packets << pkt
+  return packets
 end
 
-puts "Part2: #{part2(getInput(ARGV[0]))}"
+pp part2(pkt.new(getInput(ARGV[0]), [], [])
