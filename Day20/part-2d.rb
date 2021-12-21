@@ -57,18 +57,18 @@ def getNine(input, x, y)
 end
 
 def main(alg, input, t)
-  newinput = {}
-
+  
   t.times do |i|
+    newinput = {}
     min = input.keys.min_by { |x, y| [x, y] }
     max = input.keys.max_by { |x, y| [x, y] }
 
     ((min[1]-1)..(max[1])+1).each do |y|
       ((min[0]-1)..(max[0])+1).each do |x|
         if alg[getNine(input, x, y)] == '#'
-          newinput[[x-1, y-1]] = '1'
+          newinput[[x, y]] = '1'
         else
-          newinput[[x-1, y-1]] = '0'
+          newinput[[x, y]] = '0'
         end
       end
     end
@@ -81,46 +81,50 @@ end
 alg, input = getData(ARGV[0])
 
 # pp main(alg, input, 2).values.count('1')
+input = main(alg, input, 2)
+pp input.values.count('1')
+
+# pp main(alg, input, 2).values.count('1')
 input = main(alg, input, 50)
 pp input.values.count('1')
 
-#### Ruby2D
+# #### Ruby2D
 
-min = input.keys.min_by { |x, y| [x, y] }
-max = input.keys.max_by { |x, y| [x, y] }
-puts "min: #{min[0]},#{min[1]}"
-puts max
+# min = input.keys.min_by { |x, y| [x, y] }
+# max = input.keys.max_by { |x, y| [x, y] }
+# puts "min: #{min[0]},#{min[1]}"
+# puts max
 
-set(
-  {
-    :title => "AofC 2021 Day 20",
-    :background => 'black',
-    :width => 800,
-    :height => 800,
-  }
-)
+# set(
+#   {
+#     :title => "AofC 2021 Day 20",
+#     :background => 'black',
+#     :width => 800,
+#     :height => 800,
+#   }
+# )
 
-boxw = 800 / (min[0].abs + max[0].abs)
-boxh = 800 / (min[1].abs + max[1].abs)
-puts "boxw: #{boxw}\nbowh: #{boxh}"
+# boxw = 800 / (min[0].abs + max[0].abs)
+# boxh = 800 / (min[1].abs + max[1].abs)
+# puts "boxw: #{boxw}\nbowh: #{boxh}"
 
-for y in min[1]...(min[1] + 1) #max[1]
-  for x in min[0]..max[0]
-    if input[[x,y]] == '1'
-      colour = 'white'
-    else
-      colour = 'gray'
-    end
-    # puts "sq: x: #{(x+(min[0].abs))*boxw}, y: #{(y+(min[1].abs))*boxh}"
-    Square.new(
-      x: (x+(min[0].abs))*boxw,
-      y: (y+(min[1].abs))*boxh,
-      width: boxw, height: boxh,
-      color: colour
-    )
-    # pause
-  end
+# for y in min[1]...(min[1] + 1) #max[1]
+#   for x in min[0]..max[0]
+#     if input[[x,y]] == '1'
+#       colour = 'white'
+#     else
+#       colour = 'gray'
+#     end
+#     # puts "sq: x: #{(x+(min[0].abs))*boxw}, y: #{(y+(min[1].abs))*boxh}"
+#     Square.new(
+#       x: (x+(min[0].abs))*boxw,
+#       y: (y+(min[1].abs))*boxh,
+#       width: boxw, height: boxh,
+#       color: colour
+#     )
+#     # pause
+#   end
 
-end
+# end
 
-show
+# show

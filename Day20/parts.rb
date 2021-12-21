@@ -6,7 +6,6 @@ def pause(m = "pause")
 end
 
 def getData(f)
-  f = 'input' if f.nil?
   data = File.read("#{f}.txt").split("\n\n")
   alg = data[0]
 
@@ -14,9 +13,9 @@ def getData(f)
   data[1].split("\n").each_with_index do |row, r|
     row.chars.each_with_index do |ch, c|
       if row[c] == '#'
-        input[ [c, r] ] = 1
+        input[[c, r]] = 1
       else
-        input[ [c, r] ] = 0
+        input[[c, r]] = 0
       end
     end
   end
@@ -28,10 +27,7 @@ def printGrid(input)
   min = input.keys.min_by { |x, y| [x, y] }
   max = input.keys.max_by { |x, y| [x, y] }
 
-  puts "y range: #{min[1]}..#{max[1]}"
-  puts "x range: #{min[0]}..#{max[0]}"
-
-  for y in min[1]..max[1]
+  for y in min[1]...max[1]
     s = ''
     for x in min[0]..max[0]
       if input[[x, y]] == 1
@@ -48,65 +44,42 @@ def getNine(input, x, y)
   str = ''
   (y-1..y+1).each do |yy|
     (x-1..x+1).each do |xx|
-      if input[[xx, yy]] == 1
+      if input[[xx,yy]] == 1
         str += '1'
       else
         str += '0'
       end
-      # puts "getNine xx:#{xx}, yy:#{yy} = #{input[ [xx, yy]]}"
     end
   end
-  return str #.to_i(2)
+  return str.to_i(2)
 end
 
 def main(alg, input, t)
   
   t.times do |i|
     newinput = {}
-
     min = input.keys.min_by { |x, y| [x, y] }
     max = input.keys.max_by { |x, y| [x, y] }
-    puts "min: #{min}"
-    puts "max: #{max}"
 
     ((min[1]-1)..(max[1])+1).each do |y|
       ((min[0]-1)..(max[0])+1).each do |x|
-        str = ''
-        str = getNine(input, x, y)
-        # puts "
-        # x:#{x}, y:#{y}
-        # input    : #{input[[x, y]]}
-        # str      : #{str}
-        # bin      : #{str.to_i(2)}
-        # alg[str] : #{alg[str.to_i(2)]}
-        # "
-        if alg[str.to_i(2)] == '#'
+        if alg[getNine(input, x, y)] == '#'
           newinput[[x, y]] = 1
         else
           newinput[[x, y]] = 0
         end
       end
     end
-    # pause
     input = newinput
-    # printGrid(input)
-    # input.map { |k,v| puts "#{k}" if v == '1' }
-    # pause
   end
-
+  
   return input
 end
 
 alg, input = getData(ARGV[0])
 
-input = main(alg, input, 2)
-# printGrid(input)
-    # input.map { |k,v| puts "#{k}" if v == '1' }
+part1 = main(alg, input, 2)
+pp part1.values.count(1)
 
-puts "Part 1: #{input}"
-
-exit
-
-input = main(alg, input, 50)
-# printGrid(input)
-puts "Part 2: (input): #{input.values.count('1')}"
+part2 = main(alg, input, 50)
+pp part2.values.count(1)
