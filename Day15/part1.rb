@@ -1,5 +1,5 @@
 start = Time.now()
-DIRECTIONS = [ [1, 0], [0, 1] ]
+DIRECTIONS = [ [-1, 0], [1, 0], [0, -1], [0, 1] ]
 
 def get_neighbours(nodes, x, y)
   neighbours = []
@@ -26,7 +26,7 @@ def getData(f)
       graph[[x,y]] = {}
       neighbours.each do |nx, ny|
         # skip if already defined as neighbour of another point else would be bi-directional graph
-        # next if graph[[nx,ny]]
+        next if graph[[nx,ny]]
 
         costs[[nx,ny]] = {}
         parents[[nx,ny]] = {}

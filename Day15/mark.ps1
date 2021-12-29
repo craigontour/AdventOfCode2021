@@ -1,9 +1,12 @@
-$ErrorActionPreference="Stop"
-$data=@()
-Get-Content "$PSScriptRoot\input.txt" | %{$data+=$_}
+param([string]$file)
 
-$maxx=$data[0].Length
-$maxy=$data.Length
+$ErrorActionPreference="Stop"
+$data = @()
+
+Get-Content "$PSScriptRoot\$file.txt" | % { $data += $_ }
+
+$maxx = $data[0].length -1
+$maxy = $data.length - 1
 
 $queue = $null
 
@@ -59,23 +62,23 @@ function PopQueue
     return $i
 }
 
-$dist=@{}
-$weight=@{}
-1..$maxy | %{
+$dist = @{}
+$weight = @{}
+0..$maxy | %{
     $y = $_
-    1..$maxx | %{
+    0..$maxx | %{
         $x = $_
         $k = "$x,$y"
         $dist[$k]=[int]::MaxValue
-        $weight[$k]=[int]"$($data[$y-1][$x-1])"
+        $weight[$k]=[int]"$($data[$y][$x])"
     }
 }
-$dist["1,1"]=0
-AddToQueue 0 "1,1" 1 1
+$dist["0,0"] = 0
+AddToQueue 0 "0,0" 0 0
 
 function UpdateAdjacent($dist,$x,$y,$d,$maxx,$maxy)
 {
-    if ($x -ge 1 -and $x -le $maxx -and $y -ge 1 -and $y -le $maxy)
+    if ($x -ge 0 -and $x -le $maxx -and $y -ge 0 -and $y -le $maxy)
     {
         $k = "$x,$y"
         $v = $dist[$k]
