@@ -1,6 +1,13 @@
 start = Time.now()
 DIRECTIONS = [ [1, 0], [0, 1] ]
 
+@debug = ARGV[1]
+
+def pause(m = "pause")
+  puts "#{m}..."
+  exit if STDIN.gets.chomp == 'x'
+end
+
 def get_neighbours(nodes, x, y)
   neighbours = []
   DIRECTIONS.each do |dir|
@@ -28,6 +35,8 @@ def getData(f)
         # skip if already defined as neighbour of another point else would be bi-directional graph
         # next if graph[[nx,ny]]
 
+        puts "- #{x},#{y} has neighbour : #{nx},#{ny} with cost #{data[ny][nx]}" if @debug == '1'
+        
         costs[[nx,ny]] = {}
         parents[[nx,ny]] = {}
 
@@ -41,11 +50,23 @@ def getData(f)
         end
       end
     end
+    pause if @debug == '1'
   end
   return graph, costs, parents
 end
 
-def find_lowest_cost_node(costs, processed)
+def printCosts(costs, processed)
+  costs.each do |node, cost|
+    if cost < Float::INFINITY && !processed.include?(node)
+      puts "[COSTS] node: #{node}, cost: #{cost}" if @debug == '0'
+    elsif processed.include?(node)
+      puts "[Processed] node: #{node}, cost: #{cost}" if @debug == '0'
+    end
+  end
+  pause if @debug == '0'
+end
+
+def find_lowest_cost_node(its, costs, processed)
   lowest_cost = Float::INFINITY
   lowest_cost_node = nil
 
@@ -53,6 +74,7 @@ def find_lowest_cost_node(costs, processed)
     if cost < lowest_cost && !processed.include?(node)
       lowest_cost = cost
       lowest_cost_node = node
+      puts "#{its} lowest_cost_node: #{node} = #{cost}" if @debug == '0'
     end
   end
 
@@ -62,16 +84,27 @@ end
 def dijkstra(f, target)
   graph, costs, parents = getData(f)
   processed = []
+  
+  puts '--------------------' if @debug == '2'
+  puts "graph   :\n#{graph}",'' if @debug == '2'
+  puts "costs   :\n#{costs}",'' if @debug == '2'
+  puts "parents :\n#{parents}",'' if @debug == '2'
+  puts '--------------------' if @debug == '2'
 
   # find node with lowest cost
-  node = find_lowest_cost_node(costs, processed)
+  its = 0
+  node = find_lowest_cost_node(its, costs, processed)
   while node != nil && node != target do
+    puts "lowest_code_node: #{node}"
+  
     cost = costs[node]
     neighbours = graph[node]
+    puts "#{node} has neighbours:\n#{neighbours}" if @debug == '1'
 
     neighbours.each do |n, c|
       new_cost = cost + c
       if costs[n] > new_cost
+        puts "costs[#{n}] = #{new_cost}" if @debug == '1'
         costs[n] = new_cost
         parents[n] = node
       end
@@ -79,8 +112,16 @@ def dijkstra(f, target)
     # add to processed
     processed << node
     
-    node = find_lowest_cost_node(costs, processed)
+    its += 1
+    printCosts(costs, processed)
+    node = find_lowest_cost_node(its, costs, processed)
+    printCosts(costs, processed)
   end
+
+  # pp graph
+  # # puts "costs: #{costs.length}"
+  # pp parents
+
   return costs[target]
 end
 
