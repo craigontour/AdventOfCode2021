@@ -62,20 +62,6 @@ function PopQueue
     return $i
 }
 
-$dist = @{}
-$weight = @{}
-0..$maxy | %{
-    $y = $_
-    0..$maxx | %{
-        $x = $_
-        $k = "$x,$y"
-        $dist[$k]=[int]::MaxValue
-        $weight[$k]=[int]"$($data[$y][$x])"
-    }
-}
-$dist["0,0"] = 0
-AddToQueue 0 "0,0" 0 0
-
 function UpdateAdjacent($dist,$x,$y,$d,$maxx,$maxy)
 {
     if ($x -ge 0 -and $x -le $maxx -and $y -ge 0 -and $y -le $maxy)
@@ -91,25 +77,27 @@ function UpdateAdjacent($dist,$x,$y,$d,$maxx,$maxy)
     }
 }
 
-$stopwatch =  [system.diagnostics.stopwatch]::StartNew()
+$dist = @{}
+$weight = @{}
+0..$maxy | %{
+    $y = $_
+    0..$maxx | %{
+        $x = $_
+        $k = "$x,$y"
+        $dist[$k]=[int]::MaxValue
+        $weight[$k]=[int]"$($data[$y][$x])"
+    }
+}
+$dist["0,0"] = 0
+AddToQueue 0 "0,0" 0 0
 
-$iterations=0
 while (1)
 {
     $i = PopQueue
-    $x=$i.x
-    $y=$i.y
+    $x = $i.x
+    $y = $i.y
 
-    $iterations++
-    if ($iterations % 1000 -eq 0) { $iterations;
-        "$($stopwatch.Elapsed.hours):$($stopwatch.Elapsed.minutes):$($stopwatch.Elapsed.seconds):$($stopwatch.Elapsed.Milliseconds)"
-        $stopwatch.Restart()
-    }
-
-    if ($x -eq $maxx -and $y -eq $maxy)
-    {
-        break;
-    }
+    if ($x -eq $maxx -and $y -eq $maxy) { break }
 
     $d = $dist["$x,$y"]
     UpdateAdjacent $dist ($x-1) $y $d $maxx $maxy
