@@ -4,41 +4,41 @@ $ErrorActionPreference="Stop"
 $data = @()
 
 Get-Content "$PSScriptRoot\$file.txt" | % { $data += $_ }
-
 $maxx = $data[0].length -1
 $maxy = $data.length - 1
 
-$queue = $null
+$global:front = $null
 
-function AddToQueue($priority,$k,$x,$y)
+function AddToQueue($priority,$x,$y)
 {
     $newitem=[PSCustomObject]@{
         priority = $priority
-        k = $k
         x = $x
         y = $y
         next = $null
-        prev = $null
     }
 
-    if ($null -eq $global:queue) {$global:queue = $newitem; return}
+    if ($null -eq $global:front) {
+        $global:front = $newitem
+        return
+    }
 
-    $i = $global:queue
-    $last
+    $i = $global:front # pointer
+    $last = $null
+    
     while ($null -ne $i)
     {
+        # 
         if ($i.priority -ge $newitem.priority)
         {
             $newitem.next = $i
-            if ($null -ne $i.prev)
+            if ($null -ne $last)
             {
-                $newitem.prev = $i.prev
-                $i.prev.next = $newitem
+                $last.next = $newitem
             }
-            $i.prev = $newitem
-            if ($null -eq $newitem.prev)
+            if ($global:front -eq $i)
             {
-                $global:queue = $newitem
+                $global:front = $newitem
             }
             return
         }
@@ -48,18 +48,13 @@ function AddToQueue($priority,$k,$x,$y)
     }
 
     $last.next = $newitem
-    $newitem.prev = $last
 }
 
 function PopQueue
 {
-    $i = $Global:queue
-    $global:queue = $Global:queue.next
-    if ($null -ne $Global:queue.prev)
-    {
-        $Global:queue.prev = $null
-    }
-    return $i
+    $first = $global:front
+    $global:front = $global:front.next
+    return $first
 }
 
 function UpdateAdjacent($dist,$x,$y,$d,$maxx,$maxy)
@@ -72,7 +67,7 @@ function UpdateAdjacent($dist,$x,$y,$d,$maxx,$maxy)
         if ($sum -lt $v)
         {
             $dist[$k] = $sum
-            AddToQueue $sum $k $x $y
+            AddToQueue $sum $x $y
         }
     }
 }
@@ -88,8 +83,9 @@ $weight = @{}
         $weight[$k]=[int]"$($data[$y][$x])"
     }
 }
+
 $dist["0,0"] = 0
-AddToQueue 0 "0,0" 0 0
+AddToQueue 0 0 0
 
 while (1)
 {

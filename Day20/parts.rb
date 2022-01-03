@@ -25,7 +25,8 @@ end
 def printGrid(input)
   min = input.keys.min_by { |x, y| [x, y] }
   max = input.keys.max_by { |x, y| [x, y] }
-
+  puts "min: #{min}, max: #{max}"
+  
   for y in min[1]...max[1]
     s = ''
     for x in min[0]..max[0]
@@ -37,6 +38,7 @@ def printGrid(input)
     end
   puts s
   end
+  pause
 end
 
 def getNine(input, x, y)
@@ -69,6 +71,8 @@ def main(alg, input, t)
     end
 
     input = newinput.clone
+
+    # printGrid(input)
   end
   
   return input
@@ -77,8 +81,8 @@ end
 alg, input = getData(ARGV[0])
 
 part1 = main(alg, input, 2)
-pp part1.values.count(1)
+puts "Part 1: #{part1.values.count(1)}"
 
 part2 = main(alg, input, 50)
-pp part2.values.count(1)
-# printGrid(part2)
+puts "Part 2: #{part2.values.count(1)} (which is not correct!)"
+printGrid(part2)

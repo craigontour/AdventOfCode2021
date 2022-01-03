@@ -5,38 +5,6 @@ def pause(m = "pause")
   exit if STDIN.gets.chomp == 'x'
 end
 
-def getData(f)
-  data = File.readlines("#{f}.txt").map(&:strip)
-  maxx = data[0].length
-  maxy = data.length
-
-  dist = {}
-  weight = {}
-
-  for y in 0...(maxy * 5)
-    for x in 0...(maxx * 5)
-      
-      dist["#{x},#{y}"] = Float::INFINITY
-      
-      w = data[y % maxy][x % maxx].to_i + (x / maxx) + (y / maxy)
-      
-      if w > 9
-        weight["#{x},#{y}"] = (w % 10) + 1
-        # puts "#{x},#{y} = #{x % maxx}, #{y % maxy} : #{w % 10 + 1}"
-      else
-        weight["#{x},#{y}"] = w
-        # puts "#{x},#{y} = #{x % maxx}, #{y % maxy} : #{w}"
-      end
-    end
-  end
-
-  return dist, weight, (maxx * 5) - 1, (maxy * 5) - 1
-end
-
-dist, weight, maxx, maxy = getData(ARGV[0])
-# pp weight
-# pause
-
 def addToQueue(priority, x, y)
   newNode = {
     :priority => priority,
@@ -93,10 +61,25 @@ def updateNeighbour(dist, costs, x, y, d, maxx, maxy)
   end
 end
 
-# M A I N  L O O P
+# S T A R T
+
+data = File.readlines("#{ARGV[0]}.txt").map(&:strip)
+maxx = data[0].length - 1
+maxy = data.length - 1
+
+dist = {}
+weight = {}
+data.each_with_index do |line, y|
+  line.chars.each_with_index do |ch, x|
+    dist["#{x},#{y}"] = Float::INFINITY
+    weight["#{x},#{y}"] = data[y][x].to_i
+  end
+end
 
 dist["0,0"] = 0
 frontNode = addToQueue(0, 0, 0)
+
+# M A I N  L O O P
 
 while true do
   # Process the node with lowest priority (pop)
@@ -105,7 +88,7 @@ while true do
   y = current[:y]
 
   if x == maxy && y == maxy
-    puts "Part2: #{dist["#{maxx},#{maxy}"]} in #{Time.now - start} secs"
+    puts "Part1: #{dist["#{maxx},#{maxy}"]} in #{Time.now - start} secs"
     exit
   end
 

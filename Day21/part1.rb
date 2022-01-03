@@ -12,7 +12,7 @@ File.readlines("#{ARGV[0]}.txt").each do |line|
   players << { 'start' => true, 'position' => parts[4].to_i, 'score' => 0 }
 end
 
-puts players
+# puts players
 
 currentplayer = 0
 
@@ -42,8 +42,8 @@ while players.all? { |h| h['score'] <= 1000 } do
   pos = players[currentplayer]['position']
   newpos = (((pos-1) + roll) %  10) + 1
 
-  puts "
-  - Player #{currentplayer+1} rolls #{r..(r+2)} (#{roll}) and moves from #{pos} to #{newpos} total score: #{players[currentplayer]['score'] + newpos}"
+  # puts "
+  # - Player #{currentplayer+1} rolls #{r..(r+2)} (#{roll}) and moves from #{pos} to #{newpos} total score: #{players[currentplayer]['score'] + newpos}"
 
   players[currentplayer]['start'] = false if players[currentplayer]['start']
   players[currentplayer]['position'] = newpos
@@ -51,9 +51,9 @@ while players.all? { |h| h['score'] <= 1000 } do
 
   if players[currentplayer]['score'] >= 1000
     puts "Part 1:"
-    puts players
-    puts ''
-    puts (players.min_by { |k, v| k['score'] })['score'] * rolls * 3
+    puts "players:\n#{players}"
+    puts "rolls:  #{rolls}"
+    puts "Part 1: #{(players.min_by { |k, v| k['score'] })['score'] * rolls * 3}"
     exit
   # else
   #   puts players

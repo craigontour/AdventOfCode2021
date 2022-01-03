@@ -61,7 +61,7 @@ end
 
 def dijkstra(f, target)
   graph, costs, parents = getData(f)
-  processed = []
+  processed = {}
 
   # find node with lowest cost
   node = find_lowest_cost_node(costs, processed)
@@ -77,7 +77,7 @@ def dijkstra(f, target)
       end
     end
     # add to processed
-    processed << node
+    processed[node] = true
     
     node = find_lowest_cost_node(costs, processed)
   end
