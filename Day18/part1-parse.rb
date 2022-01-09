@@ -47,10 +47,11 @@ def explode(i, ns, nums, line, debug)
   
   line = explodeLeft(nums[0], ns, line, debug)
   line = explodeRight(nums[1], i, line, debug)
-  return line[0..ns-1] + '0' + line[i+1..-1], i
+  puts "-- exploded line: #{line[0..ns-1] + '0' + line[i+1..-1]}" if debug
+  return line[0..ns-1] + '0' + line[i+1..-1]
 end
 
-debug = false
+debug = true
 
 lines.each do |line|
   # pp line.scan(/\[\d+,\d+\]/)
@@ -77,27 +78,29 @@ lines.each do |line|
     if ch == '['
       lb += 1
       explode = true if lb - rb == 5
-      if nums.length > 0
-        nums = []
-      end
       puts "- open  : #{ch}, explode: #{explode ? 'Yes' : 'No'}" if debug
+      nums = [] if nums.length > 0
     elsif ch == ']'
+      puts "- close : #{ch}" if debug
       rb += 1
       if n != '' && nums.length == 1 && explode
         nums << n.to_i
-        line, i = explode(i, num_start-1, nums, line, debug)
-        lb -= 1
-        rb -= 1
+        line = explode(i, num_start-1, nums, line, debug)
+        # reset vars
+        i = -1
         nums = []
+        lb = 0
+        rb = 0
+        num_start = 0
+        explode = false
       end
       n = ''
-      puts "- close : #{ch}" if debug
     elsif ch == ','
+      puts "- comma : #{ch}" if debug
       if n != ''
         nums << n.to_i
         n = ''
       end
-      puts "- comma : #{ch}" if debug
     else
       # if prevCh is [ or , or 0-9 then add to n
       num_start = i if nums.length == 0
