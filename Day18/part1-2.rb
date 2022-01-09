@@ -5,15 +5,10 @@ def pause(m = "pause")
   exit if STDIN.gets.chomp == 'x'
 end
 
-def Node
+def Node(arr)
   def initialize(parent)
     @parent = parent
   end
-
-  attr_accessor :left, :right, :val, :parent
-end
-
-def Calc(str)
 end
 
 lines = File.readlines("#{ARGV[0]}.txt").map(&:chomp)
