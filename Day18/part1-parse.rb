@@ -5,7 +5,7 @@ def pause(m = "pause")
   exit if STDIN.gets.chomp == 'x'
 end
 
-lines = File.readlines("#{ARGV[0]}.txt").map(&:chomp)
+lines = File.readlines("test2.txt").map(&:chomp)
 
 def explodeLeft(num, i, line, debug)
   # This assumes that the number to the left is only 1 digit in length
@@ -47,27 +47,17 @@ def explode(i, ns, nums, line, debug)
   
   line = explodeLeft(nums[0], ns, line, debug)
   line = explodeRight(nums[1], i, line, debug)
-  return line[0..ns-1] + '0' + line[i+1..-1]
-end
-
-def split_number(i, n, line, debug)
-  # assumes only 2 digit number
-  puts "SPLIT:
-  - i   : #{i}
-  - n   : #{n}
-  - line: #{line}
-  - a, b: #{(n).to_i.divmod(2)}
-  Split line: #{line} at #{i}: #{line[i..-1]}
-  " if debug
-
-  a, b = (n).to_i.divmod(2)
-  # return "[#{a},#{a+b}]"
-  pause if debug
+  return line[0..ns-1] + '0' + line[i+1..-1], i
 end
 
 debug = false
 
-lines.each do |line|  
+lines.each do |line|
+  # pp line.scan(/\[\d+,\d+\]/)
+  # pp line.match(/\[.*\[.*\[.*\[.*\[\d+,\d+\]/)
+
+  puts "---------- New line: #{line} ----------"
+  
   i = 0
   nums = []
   n = ''
@@ -80,12 +70,6 @@ lines.each do |line|
   # while start_line != line 
   # set start_line to line, if not changed after this loop then done
   start_line = line.dup
-
-  puts "--------------------
-  line  : #{line}
-  length: #{line.length}
-  i     : #{i}
-  --------------------"
 
   while i < line.length-1 do
     ch = line[i]
@@ -101,11 +85,10 @@ lines.each do |line|
       rb += 1
       if n != '' && nums.length == 1 && explode
         nums << n.to_i
-        line = explode(i, num_start-1, nums, line, debug)
+        line, i = explode(i, num_start-1, nums, line, debug)
         lb -= 1
         rb -= 1
         nums = []
-        i = -1
       end
       n = ''
       puts "- close : #{ch}" if debug
@@ -116,6 +99,7 @@ lines.each do |line|
       end
       puts "- comma : #{ch}" if debug
     else
+      # if prevCh is [ or , or 0-9 then add to n
       num_start = i if nums.length == 0
       if n == ''
         n = ch
@@ -123,10 +107,6 @@ lines.each do |line|
         n += ch
       end
       puts "- number: #{ch}, n:#{n}, num_start:#{num_start}" if debug
-      if n.to_i > 9
-        line = split_number(i, n, line, debug)
-        i = -1
-      end
     end
 
     puts "i:#{i}, ch:#{ch}, lb:#{lb}, rb:#{rb}, n:#{n}, nums:#{nums}" if debug
