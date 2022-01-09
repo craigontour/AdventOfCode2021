@@ -5,33 +5,49 @@ def pause(m = "pause")
   exit if STDIN.gets.chomp == 'x'
 end
 
-lines = File.readlines("test2.txt").map(&:chomp)
+lines = File.readlines("#{ARGV[0]}.txt").map(&:chomp)
 
-def explodeLeft(num, i, line, debug)
-  # This assumes that the number to the left is only 1 digit in length
-  puts "-- explodeLeft: i:#{i}, num:#{num}, #{line[0..i]}" if debug
-  n = ''
-  i.downto(0).each do |j|
-    if line[j] != '[' && line[j] != ']' && line[j] != ','
-      line[j] = (line[j].to_i + num).to_s
-      puts "-- explodeLeft: n:#{n}, line[j]:#{line[j]}, line:#{line}" if debug
-      return line
+def updateLeft(num, i, oldline, debug)
+  lhs = oldline.dup
+  rhs = ''
+  puts "- updateLeft: i:#{i}, oldline: #{oldline}, num:#{num}, #{lhs[0..i-1]}" if debug
+  (i-1).downto(0).each do |j|
+    if lhs[j] == '[' || lhs[j] == ']' || lhs[j] == ','
+      rhs += lhs[j]
+    else
+      # assumes single digit number
+      nn = (lhs[j].to_i + num).to_s
+      puts "-- updateLeft :
+      lhs[0..j-1]: #{lhs[0..j-1]}
+      nn: #{nn}
+      rhs: #{rhs.reverse}
+      " if debug
+      return lhs[0..j-1] + nn + rhs.reverse
     end
   end
-  return line
+  return rhs.reverse
 end
 
-def explodeRight(num, i, line, debug)
-  # This assumes that the number to the right is only 1 digit in length
-  puts "-- explodeRight: i:#{i}, num:#{num}, #{line[i..-1]}" if debug
-  (i..(line.length-1)).each do |j|
-    if line[j] != '[' && line[j] != ']' && line[j] != ','
-      line[j] = (line[j].to_i + num).to_s
-      puts "-- explodeRight: line[j]:#{line[j]}, line:#{line}" if debug
-      return line
+def updateRight(num, oldi, oldline, debug)
+  rhs = oldline.dup
+  i = oldi.dup
+  lhs = ''
+  puts "- updateRight: i:#{i}, oldline: #{oldline}, num:#{num}, #{rhs[i+1..-1]}" if debug
+  (i+1..(rhs.length-1)).each do |j|
+    if rhs[j] == '[' || rhs[j] == ']' || rhs[j] == ','
+      lhs += rhs[j]
+    else
+      # assumes single digit number
+      nn = (rhs[j].to_i + num).to_s
+      puts "-- updateRight :
+      lhs: #{lhs}
+      nn: #{nn}
+      rhs: #{rhs[j+1..-1]}
+      " if debug
+      return lhs + nn + rhs[j+1..-1]
     end
   end
-  return line
+  return lhs
 end
 
 def explode(i, ns, nums, line, debug)
@@ -42,16 +58,35 @@ def explode(i, ns, nums, line, debug)
   - line: #{line}
 
   - line[0..ns-1]: #{line[0..ns-1] }
+  - line[ns..i]  : #{line[ns..i] }
   - line[i+1..-1]: #{line[i+1..-1]}
   " if debug
   
-  line = explodeLeft(nums[0], ns, line, debug)
-  line = explodeRight(nums[1], i, line, debug)
-  puts "-- exploded line: #{line[0..ns-1] + '0' + line[i+1..-1]}" if debug
-  return line[0..ns-1] + '0' + line[i+1..-1]
+  # line becomes left side of explode + 0 + right side of explode
+  ul = updateLeft(nums[0], ns, line, debug)
+  ur = updateRight(nums[1], i, line, debug)
+
+  puts "-- explode line: #{line} to #{ul + '0' + ur}" if debug
+  return ul + '0' + ur
 end
 
-debug = true
+def split_number(ns, i, n, line, debug)
+  a, b = n.to_i.divmod(2)
+  puts "
+  split_number:
+  ns  : #{ns}
+  i   : #{i}
+  n   : #{n}
+  a, b: #{a}, #{b}
+
+  lhs : #{line[0..ns]}
+  rhs : #{line[i+1..-1]}
+  line: #{line[0..ns]}[#{a},#{a+b}]#{line[i+1..-1]}
+  " if debug
+  return line[0..ns] + "[#{a},#{a+b}]" + line[i+1..-1]
+end
+
+debug = ARGV[1] == 'd'
 
 lines.each do |line|
   # pp line.scan(/\[\d+,\d+\]/)
@@ -73,6 +108,7 @@ lines.each do |line|
   start_line = line.dup
 
   while i < line.length-1 do
+    puts "i:#{i}, line:#{line}"
     ch = line[i]
 
     if ch == '['
@@ -85,7 +121,7 @@ lines.each do |line|
       rb += 1
       if n != '' && nums.length == 1 && explode
         nums << n.to_i
-        line = explode(i, num_start-1, nums, line, debug)
+        line = explode(i, num_start, nums, line, debug)
         # reset vars
         i = -1
         nums = []
@@ -102,17 +138,25 @@ lines.each do |line|
         n = ''
       end
     else
-      # if prevCh is [ or , or 0-9 then add to n
-      num_start = i if nums.length == 0
+      num_start = i-1 if nums.length == 0 && explode
+      puts "- number: #{ch}, n: #{n}, num_start:#{num_start}, exploding?: #{explode}" if debug
       if n == ''
         n = ch
       else
         n += ch
       end
-      puts "- number: #{ch}, n:#{n}, num_start:#{num_start}" if debug
+      if n.to_i > 9
+        line = split_number(i - n.length, i, n, line, debug)
+        # reset vars
+        i = -1
+        nums = []
+        lb = 0
+        rb = 0
+        num_start = 0
+        n = ''
+      end
     end
 
-    puts "i:#{i}, ch:#{ch}, lb:#{lb}, rb:#{rb}, n:#{n}, nums:#{nums}" if debug
     pause if debug
     
     i += 1
