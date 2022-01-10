@@ -85,7 +85,7 @@ def explode(i, nums, line)
 
   line2 = updateLeft(left, nums[0]) + '0' + updateRight(right, nums[2])
   
-  puts "explode:
+  puts "explode: #{nums}
   line: #{line}
   to  : #{line2}
   " if @debug1
@@ -96,18 +96,26 @@ def explode(i, nums, line)
 end
 
 def split_number(i, num, line)
-  a, b = num.to_i.divmod(2)
+  a, b = num.to_i.divmod(2)  
+  line2 = line[0..i-num.length] + "[#{a},#{a+b}]" + line[i+1..-1]
+
   puts "split_number:
   i: #{i}, num: #{num}, a: #{a}, b: #{b}
   num.length              : #{num.length}
   i-(num.length)          : #{i-num.length}
   line[0..(i-num.length)] : #{line[0..i-num.length]}
   line[i+1..-1]           : #{line[i+1..-1]}
-  " if @debug1
-  
-  pause if @debug1
+  " if @debug2
 
-  return true, line[0..i-num.length] + "[#{a},#{a+b}]" + line[i+1..-1]
+  if @debug1
+    puts "split: #{num}
+    line: #{line}
+    to  : #{line2}
+    " 
+    pause
+  end
+
+  return true, line2
 end
 
 input = File.readlines("#{ARGV[0]}.txt").map(&:chomp)
@@ -122,11 +130,10 @@ line = input[0]
   nums = []
   br = 0
   reduced = false
+  can_split = false
 
   while i < line.length-1 do
     ch = line[i]
-    puts "i:#{i} | ch:#{ch} | br:#{br} | line:#{line}" if @debug2
-    pause if @debug2
 
     if ch == '['
       br += 1
@@ -139,22 +146,18 @@ line = input[0]
       nums << ch if nums.length > 0
     else
       if nums.length % 2 == 0
-        # [] or ['1', ','] - add number to list
         nums << ch
       elsif nums.length == 1
-        # e.g. ["1"] - concat number to element
         nums[0] = nums[0] + ch
         puts "number on left :\n  nums   : #{nums}\n  nums[0]: #{nums[0]}\n  split  : #{nums[0].to_i > 9}" if @debug2
         reduced, line = split_number(i, nums[0], line) if nums[0].to_i > 9
       elsif nums.length == 3
-        # e.g. ["11", ",", "1"] - concat number to last element
         nums[2] = nums[2] + ch
         puts "number on right:\n  nums: #{nums}\n  nums[2]: #{nums[2]}\n  split: #{nums[2].to_i > 9}" if @debug2
         reduced, line = split_number(i, nums[2], line) if nums[2].to_i > 9
       end
     end
 
-    reduced = false
     if reduced
       i = 0
       nums = []
