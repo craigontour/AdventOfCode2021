@@ -22,21 +22,13 @@ def updateLeft(lhs, num)
         ch = lhs[j]
       end
       nn = (nn.to_i + num.to_i).to_s
-      puts "updateLeft2:
-      j   : #{j}
-      lhs : #{lhs}
-      num : #{num}
-      ul  : #{lhs[0..j] + nn + rhs.reverse}
-      " if @debug2
       return lhs[0..j] + nn + rhs.reverse
     else
       rhs += ch
     end
     j -= 1
   end
-  puts "updateLeft: (no number)
-  lhs : #{lhs}
-  " if @debug2
+
   return lhs
 end
 
@@ -54,43 +46,34 @@ def updateRight(rhs, num)
         ch = rhs[j]
       end
       nn = (nn.to_i + num.to_i).to_s
-      puts "updateRight:
-      rhs : #{rhs}
-      num : #{num}
-      ur  : #{lhs + nn + rhs[j..-1]}
-      " if @debug2
       return lhs + nn + rhs[j..-1]
     else
       lhs += ch
     end
     j += 1
   end
-  puts "updateRight: (no number)
-  rhs : #{rhs}
-  " if @debug2
+
   return rhs
 end
 
 def explode(i, nums, line)
-  left = line[0..i-(nums.length)-2]
+  left = line[0..i-(nums.join().length+2)]
   right = line[i+1..-1]
+
+  line2 = updateLeft(left, nums[0]) + '0' + updateRight(right, nums[2])
 
   puts "explode:
   i    : #{i}
   nums : #{nums}
+  nums.length+1: #{nums.length+1}
+  nums.join().length+1: #{nums.join().length+1}
+  line : #{line}
   left : #{left}
-  nums : #{nums}
   right: #{right}
-  " if @debug2
 
-  line2 = updateLeft(left, nums[0]) + '0' + updateRight(right, nums[2])
-  
-  puts "explode: #{nums}
-  line: #{line}
-  to  : #{line2}
-  " if @debug1
-
-  pause if @debug1
+  to   : #{line2}
+  "
+  pause
 
   return true, line2
 end
@@ -99,23 +82,13 @@ def split_number(i, num, line)
   a, b = num.to_i.divmod(2)  
   line2 = line[0..i-num.length] + "[#{a},#{a+b}]" + line[i+1..-1]
 
-  puts "split_number:
-  i: #{i}, num: #{num}, a: #{a}, b: #{b}
-  num.length              : #{num.length}
-  i-(num.length)          : #{i-num.length}
-  line[0..(i-num.length)] : #{line[0..i-num.length]}
-  line[i+1..-1]           : #{line[i+1..-1]}
-  " if @debug2
+  puts "split:
+  line: #{line}
+  to  : #{line2}
+  "
+  pause
 
-  if @debug1
-    puts "split: #{num}
-    line: #{line}
-    to  : #{line2}
-    " 
-    pause
-  end
-
-  return true, line2
+  return line2
 end
 
 input = File.readlines("#{ARGV[0]}.txt").map(&:chomp)
@@ -130,7 +103,8 @@ line = input[0]
   nums = []
   br = 0
   reduced = false
-  can_split = false
+  go_split = false
+  splitter = false
 
   while i < line.length-1 do
     ch = line[i]
@@ -149,12 +123,24 @@ line = input[0]
         nums << ch
       elsif nums.length == 1
         nums[0] = nums[0] + ch
-        puts "number on left :\n  nums   : #{nums}\n  nums[0]: #{nums[0]}\n  split  : #{nums[0].to_i > 9}" if @debug2
-        reduced, line = split_number(i, nums[0], line) if nums[0].to_i > 9
-      elsif nums.length == 3
+        if nums[0].to_i > 9
+          if go_split
+            line = split_number(i, nums[0], line)
+            reduced = true
+          else
+            splitter = true
+          end
+        end
+      elsif nums.length == 3    
         nums[2] = nums[2] + ch
-        puts "number on right:\n  nums: #{nums}\n  nums[2]: #{nums[2]}\n  split: #{nums[2].to_i > 9}" if @debug2
-        reduced, line = split_number(i, nums[2], line) if nums[2].to_i > 9
+        if nums[2].to_i > 9
+          if go_split
+            line = split_number(i, nums[2], line)
+            reduced = true
+          else
+            splitter = true
+          end
+        end
       end
     end
 
@@ -163,8 +149,19 @@ line = input[0]
       nums = []
       br = 0
       reduced = false
+      go_split = false
+      splitter = false
     else
       i += 1
+    end
+
+    if i == line.length-1 && splitter
+      i = 0
+      nums = []
+      br = 0
+      reduced = false
+      go_split = true
+      puts "go_split"
     end
   end
 
