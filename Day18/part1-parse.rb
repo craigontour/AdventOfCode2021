@@ -1,6 +1,7 @@
 start = Time.now()
 
-@debug = ARGV[1] == 'd'
+@debug1 = ARGV[1] == '1'
+@debug2 = ARGV[1] == '2'
 
 def pause(m = "pause")
   puts "#{m}..."
@@ -26,7 +27,7 @@ def updateLeft(lhs, num)
       lhs : #{lhs}
       num : #{num}
       ul  : #{lhs[0..j] + nn + rhs.reverse}
-      " if @debug
+      " if @debug2
       return lhs[0..j] + nn + rhs.reverse
     else
       rhs += ch
@@ -35,7 +36,7 @@ def updateLeft(lhs, num)
   end
   puts "updateLeft: (no number)
   lhs : #{lhs}
-  "
+  " if @debug2
   return lhs
 end
 
@@ -57,7 +58,7 @@ def updateRight(rhs, num)
       rhs : #{rhs}
       num : #{num}
       ur  : #{lhs + nn + rhs[j..-1]}
-      " if @debug
+      " if @debug2
       return lhs + nn + rhs[j..-1]
     else
       lhs += ch
@@ -66,51 +67,32 @@ def updateRight(rhs, num)
   end
   puts "updateRight: (no number)
   rhs : #{rhs}
-  "
+  " if @debug2
   return rhs
 end
 
-def explode(left, nums, right)
+def explode(i, nums, line)
+  left = line[0..i-(nums.length)-2]
+  right = line[i+1..-1]
+
   puts "explode:
+  i    : #{i}
+  nums : #{nums}
   left : #{left}
   nums : #{nums}
   right: #{right}
-  " if @debug
-  return updateLeft(left, nums[0]) + '0' + updateRight(right, nums[2])
-end
+  " if @debug2
 
-def check_numbers(i, br, nums, line)
-  puts "check_numbers:
-  i: #{i}
-  br: #{br}
-  nums: #{nums}
-  " if @debug
+  line2 = updateLeft(left, nums[0]) + '0' + updateRight(right, nums[2])
   
-  if br > 4 && nums.length > 1
-    line2 = explode(line[0..i-(nums.length)-2], nums, line[i+1..-1])
-  
-    puts "explode:
-    line: #{line}
-    to  : #{line2}
-    " if @debug
-  
-    return true, line2
-  elsif nums.length > 0
-    nums.join().split(',').each do |num|
-      puts "num: #{num} in nums: #{nums}"
-      if num.to_i > 9
-        puts "split_number:
-        i: #{i}
-        nums.length: #{nums.join().length+1}
-        i-(num.length)-1: #{i-(nums.join().length+1)}
-        line[0..(i-(num.length)-1)] : #{line[0..i-(nums.join().length+1)]}
-        line[i..-1]                 : #{line[i..-1]}
-        "
-        return true, line[0..i-(nums.join().length+1)] + split_number(num.to_i) + line[i..-1]
-      end
-    end
-  end
-  return false, line
+  puts "explode:
+  line: #{line}
+  to  : #{line2}
+  " if @debug1
+
+  pause if @debug1
+
+  return true, line2
 end
 
 def split_number(i, num, line)
@@ -121,7 +103,10 @@ def split_number(i, num, line)
   i-(num.length)          : #{i-num.length}
   line[0..(i-num.length)] : #{line[0..i-num.length]}
   line[i+1..-1]           : #{line[i+1..-1]}
-  "
+  " if @debug1
+  
+  pause if @debug1
+
   return true, line[0..i-num.length] + "[#{a},#{a+b}]" + line[i+1..-1]
 end
 
@@ -132,7 +117,6 @@ line = input[0]
   puts "--------------------"
   line = '[' + line + ',' + input[l] + ']'
   line_before = line.dup
-  line = '[[[[0,7],4],[15,[0,13]]],[1,1]]'
 
   i = 0
   nums = []
@@ -141,15 +125,14 @@ line = input[0]
 
   while i < line.length-1 do
     ch = line[i]
-    puts "i:#{i} | ch:#{ch} | br:#{br} | line:#{line}" if @debug
-    pause if @debug
+    puts "i:#{i} | ch:#{ch} | br:#{br} | line:#{line}" if @debug2
+    pause if @debug2
 
     if ch == '['
-      # reduced, line = check_numbers(i, br, nums, line) if nums.length > 1
       br += 1
       nums = []
     elsif ch == ']'
-      reduced, line = explode(i, br, nums, line) if nums.length > 1
+      reduced, line = explode(i, nums, line) if br > 4 && nums.length > 1
       br -= 1
       nums = []
     elsif ch == ','
@@ -161,34 +144,18 @@ line = input[0]
       elsif nums.length == 1
         # e.g. ["1"] - concat number to element
         nums[0] = nums[0] + ch
-        puts "number on left :\n  nums   : #{nums}\n  nums[0]: #{nums[0]}\n  split  : #{nums[0].to_i > 9}"
+        puts "number on left :\n  nums   : #{nums}\n  nums[0]: #{nums[0]}\n  split  : #{nums[0].to_i > 9}" if @debug2
         reduced, line = split_number(i, nums[0], line) if nums[0].to_i > 9
       elsif nums.length == 3
         # e.g. ["11", ",", "1"] - concat number to last element
         nums[2] = nums[2] + ch
-        puts "number on right:\n  nums: #{nums}\n  nums[2]: #{nums[2]}\n  split: #{nums[2].to_i > 9}"
+        puts "number on right:\n  nums: #{nums}\n  nums[2]: #{nums[2]}\n  split: #{nums[2].to_i > 9}" if @debug2
         reduced, line = split_number(i, nums[2], line) if nums[2].to_i > 9
       end
-
-      # Different cases:-
-      #   15,
-      # nums.length = 2
-      # nums.join.split(',')
-
-      #   ,11
-      # nums.length = 2
-
-      #   0,10
-      # nums.length = 3
-
-      #   12,3
-      # nums.length = 3
     end
 
+    reduced = false
     if reduced
-      puts "
-      reset the variables...
-      "
       i = 0
       nums = []
       br = 0

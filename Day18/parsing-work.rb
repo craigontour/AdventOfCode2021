@@ -59,18 +59,18 @@ br += 1
 explode = true if br == 5
 nums = [] if nums.length > 0
 elsif ch == ']'
-br -= 1
-if n != '' && nums.length == 1 && explode
-  nums << n.to_i
-  line = explode(i, num_start, nums, line, debug)
-  # reset vars
-  i = -1
-  nums = []
-  br = 0
-  num_start = 0
-  explode = false
-end
-n = ''
+  br -= 1
+  if n != '' && nums.length == 1 && explode
+    nums << n.to_i
+    line = explode(i, num_start, nums, line, debug)
+    # reset vars
+    i = -1
+    nums = []
+    br = 0
+    num_start = 0
+    explode = false
+  end
+  n = ''
 elsif ch == ','
 if n != ''
   nums << n.to_i
