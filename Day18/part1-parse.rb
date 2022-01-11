@@ -7,10 +7,13 @@ def pause(m = "pause")
   puts "#{m}..."
   r = STDIN.gets.chomp
   puts "r: #{r}"
-  if r == '1'
-    @debug = true
+  if r == '0'
+    @debug1 = false
+    @debug2 = false
+  elsif r == '1'
+    @debug1 = true
   elsif r == '2'
-    @debug = true
+    @debug2 = true
   elsif r == 'x'
     exit
   end
@@ -29,7 +32,16 @@ def updateLeft(lhs, num)
         j -= 1
         ch = lhs[j]
       end
-      nn = (nn.to_i + num.to_i).to_s
+      puts "updateLeft:
+      lhs : #{lhs}
+      num : #{num}
+      nn  : #{nn.reverse}
+      j   : #{j}
+      rhs : #{rhs}
+      (nn.reverse.to_i + num.to_i).to_s: #{(nn.reverse.to_i + num.to_i).to_s}
+      " if @debug2
+      pause if @debug2
+      nn = (nn.reverse.to_i + num.to_i).to_s
       return lhs[0..j] + nn + rhs.reverse
     else
       rhs += ch
@@ -102,21 +114,17 @@ end
 input = File.readlines("#{ARGV[0]}.txt").map(&:chomp)
 line = input[0]
 
-(1..input.length-1).each do |l|
-  puts "--------------------"
-  line = '[' + line + ',' + input[l] + ']'
-  line_before = line.dup
-
+def reduce(line)
   i = 0
   nums = []
   br = 0
   reduced = false
   go_split = false
-  splitter = false
 
   while i < line.length-1 do
     ch = line[i]
 
+    puts "  - i:#{i}, ch:#{ch}, br:#{br}, #{nums}" if @debug2
     if ch == '['
       br += 1
       nums = []
@@ -128,59 +136,90 @@ line = input[0]
       nums << ch if nums.length > 0
     else
       if nums.length % 2 == 0
+        puts "  - num: #{ch}, #{nums.length} % 2 == 0" if @debug2
         nums << ch
       elsif nums.length == 1
+        puts "  - num: #{ch}, #{nums.length} == 1" if @debug2
         nums[0] = nums[0] + ch
-        if nums[0].to_i > 9
-          if go_split
-            line = split_number(i, nums[0], line)
-            reduced = true
-          else
-            splitter = true
-          end
+        if nums[0].to_i > 9 && go_split
+          puts "go_split:
+          i: #{i}
+          nums: #{nums[0]}
+          line: #{line}
+          " if @debug1
+          line = split_number(i, nums[0], line)
+          reduced = true
         end
-      elsif nums.length == 3    
+      elsif nums.length == 3
+        puts "  - num: #{ch}, #{nums.length} == 3" if @debug2
         nums[2] = nums[2] + ch
-        if nums[2].to_i > 9
-          if go_split
-            line = split_number(i, nums[2], line)
-            reduced = true
-          else
-            splitter = true
-          end
+        if nums[2].to_i > 9 && go_split
+          puts "go_split:
+          i: #{i}
+          nums: #{nums[2]}
+          line: #{line}
+          " if @debug1
+          line = split_number(i, nums[2], line)
+          reduced = true
         end
+      else
+        puts "  - num: #{ch}, #{nums.length}, else not captured" if @debug2
       end
     end
 
     if reduced
+      puts "  - reduced, reset vars" if @debug2
       i = 0
       nums = []
       br = 0
       reduced = false
       go_split = false
       splitter = false
-      puts "reduced:
+      puts "iteration:
       line: #{line_before}
-      to  : #{line}"
+      to  : #{line}" if @debug1
     else
       i += 1
     end
 
-    puts "is split_number?
-    #{line.gsub('[','').gsub(']','').split(',').map(&:to_i).any?{|x| x> 9}}
-    "
-    if i == line.length-1 && splitter
+    puts "line: #{line}
+    - is a number > 9: #{line.gsub('[','').gsub(']','').split(',').map(&:to_i).any?{|x| x> 9}}
+    " if @debug1
+    if i == line.length-1 && line.gsub('[','').gsub(']','').split(',').map(&:to_i).any?{|x| x> 9}
+      puts "  - set go_split" if @debug2
       i = 0
       nums = []
       br = 0
       reduced = false
       go_split = true
-      puts "go_split" if @debug1
     end
   end
+end
+
+(1..input.length-1).each do |l|
+  puts "--------------------"
+  line = '[' + line + ',' + input[l] + ']'
+  line_before = line.dup
+
+  line = reduce(line)
 
   puts "reduced:
   line: #{line_before}
   to  : #{line}"
-  pause
+  pause if @debug1
+end
+
+# Magnitude
+
+while line.count('[') > 0 do
+  m = line.match(/(\[\d+,\d+\])/).captures[0]
+  l, r = m.sub('[','').sub(']','').split(',').map(&:to_i)
+  sum = (l * 3) + (r * 2)
+  line2 = line.sub(m, sum.to_s)
+  
+  puts "
+  line2 : #{line2}
+  "
+
+  line = line2
 end
