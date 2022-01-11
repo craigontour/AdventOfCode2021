@@ -5,7 +5,15 @@ start = Time.now()
 
 def pause(m = "pause")
   puts "#{m}..."
-  exit if STDIN.gets.chomp == 'x'
+  r = STDIN.gets.chomp
+  puts "r: #{r}"
+  if r == '1'
+    @debug = true
+  elsif r == '2'
+    @debug = true
+  elsif r == 'x'
+    exit
+  end
 end
 
 def updateLeft(lhs, num)
@@ -72,8 +80,8 @@ def explode(i, nums, line)
   right: #{right}
 
   to   : #{line2}
-  "
-  pause
+  " if @debug1
+  pause if @debug1
 
   return true, line2
 end
@@ -85,8 +93,8 @@ def split_number(i, num, line)
   puts "split:
   line: #{line}
   to  : #{line2}
-  "
-  pause
+  " if @debug1
+  pause if @debug1
 
   return line2
 end
@@ -151,17 +159,23 @@ line = input[0]
       reduced = false
       go_split = false
       splitter = false
+      puts "reduced:
+      line: #{line_before}
+      to  : #{line}"
     else
       i += 1
     end
 
+    puts "is split_number?
+    #{line.gsub('[','').gsub(']','').split(',').map(&:to_i).any?{|x| x> 9}}
+    "
     if i == line.length-1 && splitter
       i = 0
       nums = []
       br = 0
       reduced = false
       go_split = true
-      puts "go_split"
+      puts "go_split" if @debug1
     end
   end
 
