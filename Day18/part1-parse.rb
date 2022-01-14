@@ -6,7 +6,6 @@ start = Time.now()
 def pause(m = "pause")
   puts "#{m}..."
   r = STDIN.gets.chomp
-  puts "r: #{r}"
   if r == '0'
     @debug1 = false
     @debug2 = false
@@ -92,8 +91,8 @@ def explode(i, nums, line)
   right: #{right}
 
   to   : #{line2}
-  " if @debug1
-  pause if @debug1
+  " if @debug2
+  pause if @debug2
 
   return true, line2
 end
@@ -105,8 +104,8 @@ def split_number(i, num, line)
   puts "split:
   line: #{line}
   to  : #{line2}
-  " if @debug1
-  pause if @debug1
+  " if @debug2
+  pause if @debug2
 
   return line2
 end
@@ -146,7 +145,7 @@ def reduce(line)
           i: #{i}
           nums: #{nums[0]}
           line: #{line}
-          " if @debug1
+          " if @debug2
           line = split_number(i, nums[0], line)
           reduced = true
         end
@@ -158,35 +157,27 @@ def reduce(line)
           i: #{i}
           nums: #{nums[2]}
           line: #{line}
-          " if @debug1
+          " if @debug2
           line = split_number(i, nums[2], line)
           reduced = true
         end
-      else
-        puts "  - num: #{ch}, #{nums.length}, else not captured" if @debug2
       end
     end
 
     if reduced
-      puts "  - reduced, reset vars" if @debug2
       i = 0
       nums = []
       br = 0
       reduced = false
       go_split = false
       splitter = false
-      puts "iteration:
-      line: #{line_before}
-      to  : #{line}" if @debug1
+      puts "reduced to:\n#{line}" if @debug1
+      pause if @debug1
     else
       i += 1
     end
 
-    puts "line: #{line}
-    - is a number > 9: #{line.gsub('[','').gsub(']','').split(',').map(&:to_i).any?{|x| x> 9}}
-    " if @debug1
     if i == line.length-1 && line.gsub('[','').gsub(']','').split(',').map(&:to_i).any?{|x| x> 9}
-      puts "  - set go_split" if @debug2
       i = 0
       nums = []
       br = 0
@@ -194,6 +185,7 @@ def reduce(line)
       go_split = true
     end
   end
+  return line
 end
 
 (1..input.length-1).each do |l|
@@ -206,7 +198,7 @@ end
   puts "reduced:
   line: #{line_before}
   to  : #{line}"
-  pause if @debug1
+  pause
 end
 
 # Magnitude
